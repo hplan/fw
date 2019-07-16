@@ -31,8 +31,13 @@ def run():
         print "%1s %-10s: %-34s %s" % ("*", "dir", pd['dir'], "*")
         print "%1s %-46s %s" % ("*", " ", "*")
 
-    rid = raw_input("%1s %-20s" % ("*", "choose product id: "))
-    save_product(rid)
+    while True:
+        rid = raw_input("%1s %-20s" % ("*", "choose product id: "))
+        if not rid.isdigit():
+            print "%1s %-46s %s" % ("*", "product id must be a number, unknown id: %s" % rid, "*")
+        else:
+            save_product(rid)
+            break
 
     tag = raw_input("%1s %-20s" % ("*", "input compare tag: "))
     git_log_dir = git_utils.get_git_logs(tag)
