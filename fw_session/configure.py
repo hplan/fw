@@ -4,6 +4,7 @@ import os
 from model import DatabaseExecutor as db
 from setup import product_setup
 from setup import bz_setup
+import signal
 
 executor = db.DatabaseExecutor()
 
@@ -32,7 +33,14 @@ def run():
             print "%1s %-46s %s" % ("*", "unknown combo %s" % combo, "*")
 
 
+def on_signal_interrupt(signal, frame):
+    print "\n\n bye ~"
+    exit(0)
+
+
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, on_signal_interrupt)
+
     if not os.path.exists("./db/fw.db"):
         executor.create_db()
     run()

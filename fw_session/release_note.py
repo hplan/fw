@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import BugzillaApi
 import ConfigParser
 import model.DatabaseExecutor as model
 import model.git_utils as git_utils
+import signal
 
 executor = model.DatabaseExecutor()
 controller = BugzillaApi.BugzillaApi()
@@ -41,13 +43,46 @@ def run():
 
     tag = raw_input("%1s %-20s" % ("*", "input compare tag: "))
     git_log_dir = git_utils.get_git_logs(tag)
-    print "\ngit logs since " + tag + ":\n"
+    print " "
+    print " git logs since %s:" % tag
     bugs = git_utils.parse_git_logs(git_log_dir)
     controller.get_bugs_info(bugs)
-    controller.get_release_note()
+    print " "
+    print " RESOLVED FIXED bugs on Bugzilla: "
+    bug_ids = controller.get_release_note()
 
-    # TODO: add comment support
+    # add comment support
+    # ask for comment intent
+    print " "
+    post = raw_input("%1s %-20s" % ("*", "do you want to comment on these bug? (Y/N) "))
+    if post == 'Y' or post == 'y':
+        pass
+    else:
+        exit(0)
+
+    # get input comment
+    comment = raw_input("%1s %-20s" % ("*", "input the comment: \n"))
+    print " "
+    print "* your comment is: \n %s" % comment
+
+    # secondary confirm
+    print " "
+    post = raw_input("%1s %-20s" % ("*", "Are you sure to comment on these bug? (Y/N) "))
+    if post == 'Y' or post == 'y':
+        pass
+    else:
+        exit(0)
+
+    # do comment request
+    for bug_id in bug_ids:
+        controller.comment(bug_id, comment)
+
+
+def on_signal_interrupt(signal, frame):
+    print "\n\n bye~"
+    exit(0)
 
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, on_signal_interrupt)
     run()

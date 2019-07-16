@@ -88,7 +88,7 @@ class BugzillaApi:
                     summary = d['summary']
                     print "%10s %10s %10s [Bug %s] %s" % (product, status, resolution, bug_id, summary)
                 print("\n")
-                print "total: %d" % len(data['bugs'])
+                print " total: %d" % len(data['bugs'])
             return data
         elif r.status_code == 401:
             self.do_login()
@@ -110,11 +110,13 @@ class BugzillaApi:
             data = r.json()
             bugs = data['bugs']
             if bugs:
-                print "RESOLVED FIXED bugs:\n"
+                bug_ids = []
                 for b in bugs:
-                    print "[Bug %s] %s" % (b['id'], b['summary'])
+                    bug_ids.append(b['id'])
+                    print " [Bug %s] %s" % (b['id'], b['summary'])
                 print "\n"
-                print "total: %d" % len(bugs)
+                print " total: %d" % len(bugs)
+                return bug_ids
         elif r.status_code == 401:
             self.do_login()
             self.load_cfg()
