@@ -75,7 +75,6 @@ class BugzillaApi:
             "token": self.token
         }
         r = requests.get(url, params=query)
-        print r.status_code
         if r.status_code == 200:
             data = r.json()
             if data:

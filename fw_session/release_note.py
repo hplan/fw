@@ -38,8 +38,10 @@ def run():
     git_log_dir = git_utils.get_git_logs(tag)
     print "\ngit logs since " + tag + ":\n"
     bugs = git_utils.parse_git_logs(git_log_dir)
-    # bugs = [140237, 140240, 140241]
     controller.get_bugs_info(bugs)
+    controller.get_release_note()
+
+    # TODO: add comment support
 
 
 if __name__ == "__main__":
