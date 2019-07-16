@@ -1,0 +1,21 @@
+rest:
+    # GET /rest/login?login=${user}&password=${pwd}
+    login: /rest/login
+
+    # GET /rest/valid_login?login=${user}&token=${token}
+    valid_login: /rest/valid_login
+
+    # GET /rest/logout?token=${token}
+    logout: /rest/logout
+
+    # GET /rest/bug/${id_or_alias}
+    bug: /rest/bug/%s
+
+    # GET /rest/bug?id=12434,43421
+    search: /rest/bug
+
+    # Update Bug
+    # PUT /rest/bug/${id_or_alias}
+    # useful api url please visit: https://bugzilla.readthedocs.io/en/latest/api/core/v1/bug.html#get-bug
+    update_bug: /rest/bug/%s
+

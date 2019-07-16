@@ -1,0 +1,12 @@
+{
+  "login": "/rest/login",
+  "valid_login": "/rest/valid_login",
+  "logout": "/rest/logout",
+  "bug": "/rest/bug/%s",
+  "search": "/rest/bug",
+  "update-bug": "/rest/bug/%s/comment"
+}
+
+
+
+
