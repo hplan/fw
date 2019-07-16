@@ -34,6 +34,5 @@ def run():
 
 if __name__ == '__main__':
     if not os.path.exists("./db/fw.db"):
-        print "not exists"
         executor.create_db()
     run()
