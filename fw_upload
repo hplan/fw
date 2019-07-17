@@ -1,0 +1,247 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+import sys
+import signal
+import getopt
+import ConfigParser
+import os
+
+
+class Firmware(dict):
+    def __init__(self, *args, **kwargs):
+        super(dict, self).__init__(*args, **kwargs)
+        self.build_type = "eng"
+        self.upload_bin_only = 0
+        self.upload_to_ipvt = 0
+        pass
+
+    def __getattr__(self, name):
+        value = self[name]
+        if isinstance(value, dict):
+            value = dict(value)
+        return value
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+    # string: eagle/d33/bat/alpaca/nec/d13
+    def set_product(self, product):
+        setattr(self, "product", product)
+
+    def get_product(self):
+        return getattr(self, "product")
+
+    # string: version 1.0.0.1
+    def set_version(self, version):
+        setattr(self, "version", version)
+
+    def get_version(self):
+        return getattr(self, "version")
+
+    # string: btype user or eng
+    def set_build_type(self, btype):
+        setattr(self, "build_type", btype)
+
+    def get_build_type(self):
+        return getattr(self, "build_type")
+
+    # int: up_type 1: upload bin only 0: not only
+    def set_upload_bin_only(self, up_type):
+        setattr(self, "upload_bin_only", up_type)
+
+    def get_upload_bin_only(self):
+        return getattr(self, "upload_bin_only")
+
+    # int: ipvt 1: up 0: don't up
+    def set_upload_to_ipvt(self, ipvt):
+        setattr(self, "upload_to_ipvt", ipvt)
+
+    def get_upload_to_ipvt(self):
+        return getattr(self, "upload_to_ipvt")
+
+
+class Upload:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def upload(fw):
+        print "*"
+        print "*" * 100
+        print "* start uploading..."
+        print "*"
+
+        fw_name_pack = fw.__getattr__("fw_name_pack")
+        product = fw.__getattr__("opengoo_product")
+        module = fw.__getattr__("opengoo_module")
+        ipvt_fw_path = fw.__getattr__("ipvt_fw_path")
+        pack_path = os.path.join(os.path.abspath(os.path.curdir), fw.get_product(), fw.get_version())
+
+        print "* cd /home/hplan/opengoo/ && ./OpengooMain.py -p '%s' -m '%s' -l %s" \
+              % (product, module, os.path.join(pack_path, fw_name_pack))
+        os.system(
+            "cd /home/hplan/opengoo/ && ./OpengooMain.py -p '%s' -m '%s' -l %s"
+            % (product, module, os.path.join(pack_path, fw_name_pack)))
+
+        if not fw.get_upload_bin_only() == 1:
+            img_name_pack = fw.__getattr__("img_name_pack")
+            print "* cd /home/hplan/opengoo/ && ./OpengooMain.py -p '%s' -m '%s' -l %s" \
+                  % (product, module, os.path.join(pack_path, img_name_pack))
+            os.system(
+                "cd /home/hplan/opengoo/ && ./OpengooMain.py -p '%s' -m '%s' -l %s"
+                % (product, module, os.path.join(pack_path, img_name_pack)))
+
+        if fw.get_upload_to_ipvt() == 1:
+            fw_name_origin = fw.__getattr__("fw_name_origin")
+            print "scp %s hplan@fw.ipvideotalk.com:%s" % (fw_name_origin, ipvt_fw_path)
+            os.system("scp %s hplan@fw.ipvideotalk.com:%s" % (fw_name_origin, ipvt_fw_path))
+
+
+class Pack:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def check_exists(path):
+        if not os.path.exists(path):
+            print "* "
+            print "* Error: %s is not exists." % path
+            sys.exit()
+
+    @staticmethod
+    def pack(fw):
+        print "*"
+        print "* start packing..."
+        print "*"
+        product = fw.get_product()
+        version = fw.get_version()
+        upload_bin_only = fw.get_upload_bin_only() == 1
+        fw_name_origin = fw.__getattr__("fw_name_origin")
+        fw_name_pack = fw.__getattr__("fw_name_pack")
+        img_name_origin = fw.__getattr__("img_name_origin")
+        img_name_pack = fw.__getattr__("img_name_pack")
+        fw_path = fw.__getattr__("fw_path")
+
+        new_dir = os.path.join('.', product, version)
+        print "* mkdir -p %s'" % new_dir
+        os.system("mkdir -p %s" % new_dir)
+        print "* cd %s'" % new_dir
+        os.walk(new_dir)
+
+        fw_origin = os.path.join(fw_path, fw_name_origin)
+        img_origin = os.path.join(fw_path, img_name_origin)
+
+        # check file exists
+        Pack.check_exists(fw_origin)
+        # copy fw.bin
+        print "* cd %s && cp %s %s" % (new_dir, fw_origin, '.')
+        os.system("cd %s && cp %s %s" % (new_dir, fw_origin, '.'))
+        # shutil.copy(fw_origin, '.')
+        # pack fw.bin
+        print "* cd %s &&  tar -cf %s %s" % (new_dir, fw_name_pack, fw_name_origin)
+        os.system("cd %s && tar -cf %s %s" % (new_dir, fw_name_pack, fw_name_origin))
+
+        # check if upload bin only
+        if not upload_bin_only:
+            print "*"
+            Pack.check_exists(img_origin)
+            # copy img
+            print "* cd %s && cp %s %s" % (new_dir, img_origin, img_name_pack)
+            os.system("cd %s && cp %s %s" % (new_dir, img_origin, img_name_pack))
+            # shutil.copy(img_origin, img_name_pack)
+        # md5sum check
+        print "*"
+        print "* MD5SUM:"
+        os.system("cd %s && md5sum *" % new_dir)
+        print "*"
+        print "* pack done."
+
+
+def help():
+    print """
+SYNOPSIS
+    fw_upload [-h] [-p product] [-s] [-v version] [-o] [-t]
+    
+DESCRIPTION
+    copy firmware and pack it.
+    upload firmware to OpenGoo.
+    upload firmware to fw.ipvideotalk.com 
+    
+OPTIONS
+    -h  Print this help document
+    
+    -p  --product=[product] Specify the firmware product, product arguments can be specified as:
+                              eagle       GXV3350
+                              bat         GXV3370
+                              alpaca      GXV3380
+                              nec         GXV3370 OEM (NEC)
+                              d33         GXV3380 OEM (CMCC)
+        
+    -s  --user              Specify firmware build type as user, default was eng.
+    
+    -o  --upload-bin-only   Specify only upload ${PRODUCT}fw.bin, do not upload flash img.
+    
+    -t  --upload-to-ipvt    Specify will upload this ${PRODUCT}fw.bin to fw.ipvideotalk.com
+    
+    -v  --version=[version] Specify the firmware version
+    """
+
+
+def load_ini(fw):
+    version = fw.get_version()
+    product = fw.get_product()
+
+    parser = ConfigParser.ConfigParser()
+    parser.read(".fw_upload.ini")
+
+    fw.__setattr__("fw_name_origin", parser.get(product, "fw_name_origin"))
+    fw.__setattr__("fw_name_pack", parser.get(product, "fw_name_pack") % version)
+    fw.__setattr__("img_name_pack", parser.get(product, "img_name_pack") % version)
+    fw.__setattr__("opengoo_product", parser.get(product, "opengoo_product"))
+    fw.__setattr__("opengoo_module", parser.get(product, "opengoo_module"))
+    fw.__setattr__("ipvt_fw_path", parser.get(product, "ipvt_fw_path"))
+    fw.__setattr__("fw_path", parser.get(product, "fw_path_%s" % fw.get_build_type()) % version)
+    img_name_origin = parser.get(product, "img_name_origin")
+    if "%s" in img_name_origin:
+        img_name_origin = img_name_origin % version
+    fw.__setattr__("img_name_origin", img_name_origin)
+
+
+def run(argv):
+    try:
+        opts, args = getopt.getopt(argv, "v:p:host", ["version=", "product=", "help",
+                                                      "upload-bin-only", "user", "upload-to-ipvt"])
+    except getopt.GetoptError as e:
+        raise e
+
+    fw = Firmware()
+    for opt, arg in opts:
+        if opt == '-h':
+            help()
+            sys.exit()
+        elif opt in ("-v", "--version"):
+            fw.set_version(arg)
+        elif opt in ("-p", "--product"):
+            fw.set_product(arg)
+        elif opt in ("-s", "--user"):
+            fw.set_build_type("user")
+        elif opt in ("-o", "--upload-bin-only"):
+            fw.set_upload_bin_only(1)
+        elif opt in ("-t", "--upload-to-ipvt"):
+            fw.set_upload_to_ipvt(1)
+        else:
+            pass
+
+    load_ini(fw)
+    Pack.pack(fw)
+    Upload.upload(fw)
+
+
+def on_signal_interrupt(sig, frame):
+    print "RCV: signal(%s)" % sig
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    signal.signal(signal.SIGINT, on_signal_interrupt)
+    run(sys.argv[1:])
