@@ -93,8 +93,8 @@ class Upload:
 
         if fw.get_upload_to_ipvt() == 1:
             fw_name_origin = fw.__getattr__("fw_name_origin")
-            print "scp %s hplan@fw.ipvideotalk.com:%s" % (os.path.join(pack_path, fw_name_origin), ipvt_fw_path)
-            os.system("scp %s hplan@fw.ipvideotalk.com:%s" % (os.path.join(pack_path, fw_name_origin), ipvt_fw_path))
+            print "scp %s hplan@fw.ipvideotalk.com:%s" % (fw_name_origin, ipvt_fw_path)
+            os.system("scp %s hplan@fw.ipvideotalk.com:%s" % (fw_name_origin, ipvt_fw_path))
 
 
 class Pack:
@@ -103,7 +103,8 @@ class Pack:
 
     @staticmethod
     def check_exists(path):
-        if not os.path.exists(path):
+
+        if not "*" in path and not os.path.exists(path):
             print "* "
             print "* Error: %s is not exists." % path
             sys.exit()
