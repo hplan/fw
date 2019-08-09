@@ -24,7 +24,7 @@ def get_git_logs(tag):
 
     t = os.getcwd() + '/git-logs.txt'
     os.system("cd " + str(project_dir)
-              + " && repo forall -c 'git log --format=%s --no-merges ..." + tag + "' > "
+              + " && repo forall -c 'git log --format=\"%<|(15)%an %s\" --no-merges ..." + tag + "' > "
               + t + " 2> /dev/null")
     return t
 
