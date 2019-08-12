@@ -78,9 +78,9 @@ build() {
     mkdir -p /var/www/html/hz/firmware/GXV3380/${version}/user -p
     cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh
     if ${ENG}; then
-      cd ${PROJ_PATH} && lunch cht_alpaca-eng
+      cd ${PROJ_PATH}/android && lunch cht_alpaca-eng
     else
-      cd ${PROJ_PATH} && lunch cht_alpaca-user
+      cd ${PROJ_PATH}/android && lunch cht_alpaca-user
     fi
 
     if ${BUILD_KERNEL}; then
@@ -95,9 +95,9 @@ build_debug() {
     echo "mkdir -p /var/www/html/hz/firmware/GXV3380/${version}/user -p"
     echo "cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh"
     if ${ENG}; then
-        echo "cd ${PROJ_PATH} && lunch cht_alpaca-eng"
+        echo "cd ${PROJ_PATH}/android && lunch cht_alpaca-eng"
     else
-        echo "cd ${PROJ_PATH} && lunch cht_alpaca-user"
+        echo "cd ${PROJ_PATH}/android && lunch cht_alpaca-user"
     fi
     if ${BUILD_KERNEL}; then
         echo "cd ${PROJ_PATH}/cht && ./build.sh -c"

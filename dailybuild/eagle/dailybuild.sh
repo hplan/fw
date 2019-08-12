@@ -75,9 +75,9 @@ mail() {
 build() {
     cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh
     if ${ENG}; then
-        cd ${PROJ_PATH} && lunch full_eagle-eng
+        cd ${PROJ_PATH}/android && lunch full_eagle-eng
     else
-        cd ${PROJ_PATH} && lunch full_eagle-user
+        cd ${PROJ_PATH}/android && lunch full_eagle-user
     fi
 
     if ${BUILD_KERNEL}; then
@@ -90,9 +90,9 @@ build() {
 build_debug() {
     echo "cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh"
     if ${ENG}; then
-        echo "cd ${PROJ_PATH} && lunch full_bat-eng"
+        echo "cd ${PROJ_PATH}/android && lunch full_bat-eng"
     else
-        echo "cd ${PROJ_PATH} && lunch full_bat-user"
+        echo "cd ${PROJ_PATH}/android && lunch full_bat-user"
     fi
 
     if ${BUILD_KERNEL}; then
