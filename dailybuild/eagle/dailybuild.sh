@@ -37,7 +37,7 @@ repo_sync() {
     repo forall -c "git reset && git checkout . && git checkout ${BRANCH}"
     repo sync
 
-    repo forall -c "git pull `git remote` ${BRANCH} && git rebase m/master"
+    repo forall -c "git pull \`git remote\` ${BRANCH} && git rebase m/master"
     repo forall -p -c  git log  --graph  --name-status --since="24 hours ago" --pretty=format:"<span style='color:#00cc33'>%ci</span>  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span>      <span style='color:yellow'> %B</span>%nFiles List:"  > ${Log_Raw}
 }
 
@@ -50,7 +50,7 @@ repo_sync_debug() {
     echo "repo forall -c \"git reset && git checkout . && git checkout ${BRANCH}\""
     echo "repo sync"
 
-    echo "repo forall -c \"git pull `git remote` ${BRANCH} && git rebase m/master\""
+    echo "repo forall -c \"git pull \`git remote\` ${BRANCH} && git rebase m/master\""
     echo "repo forall -p -c \"git log  --graph  --name-status --since=\"24 hours ago\" \
 --pretty=format:\"<span style='color:#00cc33'>%ci</span> \
  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span> \
@@ -73,6 +73,9 @@ mail() {
 }
 
 build() {
+    source ${SH_PATH}/../../env.sh
+    source ${SH_PATH}/../../openjdk-8-env
+
     cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh
     if ${ENG}; then
         cd ${PROJ_PATH}/android && lunch full_eagle-eng
@@ -119,7 +122,7 @@ entrance() {
     fi
 }
 
-while getopts "v:r:csh" arg
+while getopts "v:r:csbh" arg
 do
     case ${arg} in
         h)
@@ -128,8 +131,7 @@ do
            ;;
 
         v)
-           export VERSION=${OPTARG}
-           export BUILD_CMD="${BUILD_CMD} -v ${VERSION}"
+           export BUILD_CMD="${BUILD_CMD} -v ${OPTARG}"
            ;;
 
         r)

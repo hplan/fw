@@ -6,12 +6,12 @@ export BUILD_KERNEL=false
 export MAIL_TO_DEBUG="hplan@grandstream.cn"
 export MAIL_TO="hz_gxv33xx@grandstream.cn"
 export SH_PATH="$(cd "$(dirname "$0")";pwd)"
-PROJ_TOP=/home/hplan/project/eagle
+PROJ_TOP=/home/hplan/project/alpaca7
 export BUILD_CMD="./autoBuild.sh"
 
 print_help() {
 echo "
-    release tool for GXV3350
+    release tool for GXV3380
 
     # -h: print this help document
     # -r: specify email addressee. default: hz_gxv33xx@grandstream.cn
@@ -72,16 +72,16 @@ build() {
     source ${SH_PATH}/../../openjdk-8-env
     cd ${PROJ_TOP}/android && source ${PROJ_TOP}/android/build/envsetup.sh
     if ${ENG}; then
-        cd ${PROJ_TOP}/android && lunch full_eagle-eng
+        cd ${PROJ_TOP}/android && lunch cht_alpaca-eng
     else
-        cd ${PROJ_TOP}/android && lunch full_eagle-user
+        cd ${PROJ_TOP}/android && lunch cht_alpaca-user
     fi
 
     if ${BUILD_KERNEL}; then
-        cd ${PROJ_TOP}/kernel-3.18 && ./buildkernel.sh -b
+        cd ${PROJ_TOP}/cht && ./build.sh -c
     fi
 
-    cd ${PROJ_TOP}/android/vendor/grandstream/build && ${PROJ_TOP} -r ${MAIL_TO} -g eagle
+    cd ${PROJ_TOP}/android/vendor/grandstream/build && ${PROJ_TOP} -r ${MAIL_TO}
 }
 
 build

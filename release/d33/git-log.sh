@@ -2,14 +2,14 @@
 
 export VERSION="0.0.0.0"
 export MAIL_TO="hz_gxv33xx@grandstream.cn"
-export PROJ_TOP=/home/hplan/project/eagle
+export PROJ_TOP=/home/hplan/project/alpaca7
 
-Log_Raw="/tmp/logNecRaw.html"
-Log_Pretty="/tmp/logNecPretty.html"
+Log_Raw="/tmp/logD33Raw.html"
+Log_Pretty="/tmp/logD33Pretty.html"
 
 print_help() {
     echo "
-    release tool for GXV3370 OEM NEC
+    release tool for GXV3380 OEM D33
     
     # -h: print this help document
     # -r: specify email addressee. default: hz_gxv33xx@grandstream.cn
@@ -57,5 +57,5 @@ else
         sed -e 's/$/<br>/g' ${Log_Raw} >> ${Log_Pretty}
         echo "</div></body></html>" >> ${Log_Pretty}
 
-        sendemail -f hz_no_reply@grandstream.cn -t ${MAIL_TO} -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3370 OEM NEC ${VERSION} git log" < ${Log_Pretty}
+        sendemail -f hz_no_reply@grandstream.cn -t ${MAIL_TO} -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3370 ${VERSION} git log" < ${Log_Pretty}
 fi

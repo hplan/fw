@@ -28,7 +28,6 @@ echo "
 }
 
 repo_sync() {
-    source ${SH_PATH}/../../env.sh
     # clear previous log
     cat /dev/null > ${Log_Raw}
     cat /dev/null > ${Log_Pretty}
@@ -37,7 +36,7 @@ repo_sync() {
     repo forall -c "git reset && git checkout . && git checkout ${BRANCH}"
     repo sync
 
-    repo forall -c "git pull `git remote` ${BRANCH} && git rebase m/master"
+    repo forall -c "git pull \`git remote\` ${BRANCH} && git rebase m/master"
     repo forall -p -c  git log  --graph  --name-status --since="22 hours ago" --pretty=format:"<span style='color:#00cc33'>%ci</span>  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span>      <span style='color:yellow'> %B</span>%nFiles List:"  > ${Log_Raw}
 }
 
@@ -50,7 +49,7 @@ repo_sync_debug() {
     echo "repo forall -c \"git reset && git checkout . && git checkout ${BRANCH}\""
     echo "repo sync"
 
-    echo "repo forall -c \"git pull `git remote` ${BRANCH} && git rebase m/master\""
+    echo "repo forall -c \"git pull \`git remote\` ${BRANCH} && git rebase m/master\""
     echo "repo forall -p -c \"git log  --graph  --name-status --since=\"22 hours ago\" \
 --pretty=format:\"<span style='color:#00cc33'>%ci</span> \
  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span> \
@@ -73,19 +72,22 @@ mail() {
 }
 
 build() {
+    source ${SH_PATH}/../../env.sh
+    source ${SH_PATH}/../../openjdk-8-env
     version="10."`date -d"tomorrow" +%y.%m.%d`
 
     mkdir -p /var/www/html/hz/firmware/GXV3380/${version}/user -p
     cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh
     if ${ENG}; then
-      cd ${PROJ_PATH}/android && lunch cht_alpaca-eng
+        cd ${PROJ_PATH}/android && lunch cht_alpaca-eng
     else
-      cd ${PROJ_PATH}/android && lunch cht_alpaca-user
+        cd ${PROJ_PATH}/android && lunch cht_alpaca-user
     fi
 
     if ${BUILD_KERNEL}; then
         cd ${PROJ_PATH}/cht && ./build.sh -c
     fi
+
     cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO}
 }
 
@@ -99,6 +101,7 @@ build_debug() {
     else
         echo "cd ${PROJ_PATH}/android && lunch cht_alpaca-user"
     fi
+
     if ${BUILD_KERNEL}; then
         echo "cd ${PROJ_PATH}/cht && ./build.sh -c"
     fi

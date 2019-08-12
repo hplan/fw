@@ -1,11 +1,13 @@
 #!/bin/bash
 
 export VERSION="0.0.0.0"
-MAIL_LIST="hz_gxv33xx@grandstream.cn"
-PROJ_TOP=/home/hplan/project/eagle
-DEBUG=0
+export MAIL_TO="hz_gxv33xx@grandstream.cn"
+export PROJ_TOP=/home/hplan/project/eagle
 
-printHelp() {
+Log_Raw="/tmp/logEagleRaw.html"
+Log_Pretty="/tmp/logEaglePretty.html"
+
+print_help() {
     echo "
     release tool for GXV3350
     
@@ -18,9 +20,9 @@ printHelp() {
 
 while getopts "v:r:t:h" arg
 do
-    case $arg in
+    case ${arg} in
         h)
-           printHelp
+           print_help
            exit 0
            ;;
 
@@ -29,7 +31,7 @@ do
            ;;
 
         r)
-           export MAIL_LIST=$OPTARG
+           export MAIL_TO=$OPTARG
            ;;
 
         t)
@@ -43,18 +45,17 @@ do
     esac
 done
 
-cat /dev/null > /tmp/logBat.html && cat /dev/null > /tmp/logBat2.html
+cat /dev/null > ${Log_Raw}
+cat /dev/null > ${Log_Pretty}
 
-cd $PROJ_TOP 
+cd ${PROJ_TOP} && repo forall -p -c git log --graph --name-status ...${TAG} --pretty=format:"<span style='color:#00cc33'>%ci</span>  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span>      <span style='color:yellow'> %s </span>%nFiles List:"  > ${Log_Raw}
 
-repo forall -p -c git log --graph --name-status ...${TAG} --pretty=format:"<span style='color:#00cc33'>%ci</span>  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span>      <span style='color:yellow'> %s </span>%nFiles List:"  > /tmp/logBat.html
-
-if [ $(stat -c %s /tmp/logBat.html ) -eq 0 ]; then
-        echo "Empty file"
+if [[ $(stat -c %s ${Log_Raw}) -eq 0 ]]; then
+        echo "There is no commit, nothing to do."
 else
-        echo "<html> <body  style='background-color:#151515; font-size: 14pt; color: white'><div style='background-color:#151515; color: white'>" > /tmp/logBat2.html
-        sed -e 's/$/<br>/g'  /tmp/logBat.html >> /tmp/logBat2.html
-        echo "</div></body></html>" >> /tmp/logBat2.html
+        echo "<html> <body  style='background-color:#151515; font-size: 14pt; color: white'><div style='background-color:#151515; color: white'>" > ${Log_Pretty}
+        sed -e 's/$/<br>/g' ${Log_Raw} >> ${Log_Pretty}
+        echo "</div></body></html>" >> ${Log_Pretty}
 
-        sendemail -f hz_no_reply@grandstream.cn -t $MAIL_LIST -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3350 ${VERSION} git log" < /tmp/logBat2.html
+        sendemail -f hz_no_reply@grandstream.cn -t ${MAIL_TO} -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3350 ${VERSION} git log" < ${Log_Pretty}
 fi
