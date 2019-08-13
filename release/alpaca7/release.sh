@@ -81,7 +81,7 @@ build() {
         cd ${PROJ_TOP}/cht && ./build.sh -c
     fi
 
-    cd ${PROJ_TOP}/android/vendor/grandstream/build && ${PROJ_TOP} -r ${MAIL_TO}
+    cd ${PROJ_TOP}/android/vendor/grandstream/build && ${BUILD_CMD} -r ${MAIL_TO}
 }
 
 build
