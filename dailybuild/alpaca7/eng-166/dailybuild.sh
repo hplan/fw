@@ -10,6 +10,7 @@ export MAIL_TITLE="GXV3380 eng git log"
 export SH_PATH="$(cd "$(dirname "$0")";pwd)"
 export PROJ_PATH="/media/gshz/newdisk/ahluo/Alpaca7"
 export BUILD_CMD="./autoBuild.sh"
+export version="10."`date -d"tomorrow" +%y.%m.%d`
 
 Log_Raw="/tmp/logRaw_Alpaca.html"
 Log_Pretty="/tmp/logPretty_Alpaca.html"
@@ -65,7 +66,7 @@ mail() {
         echo "sed -e 's/$/<br>/g' ${Log_Raw} >> ${Log_Pretty}"
         echo "</div></body></html>" >> ${Log_Pretty}
         if ! ${DEBUG}; then
-            sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "${MAIL_TITLE}" < ${Log_Pretty}
+            sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3380 eng ${version} git log" < ${Log_Pretty}
         fi
         return 0
     fi
@@ -74,7 +75,6 @@ mail() {
 build() {
     source ${SH_PATH}/../../env.sh
     source ${SH_PATH}/../../openjdk-8-env
-    version="10."`date -d"tomorrow" +%y.%m.%d`
 
     mkdir -p /var/www/html/hz/firmware/GXV3380/${version}/user -p
     cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh
@@ -88,12 +88,10 @@ build() {
         cd ${PROJ_PATH}/cht && ./build.sh -c
     fi
 
-    cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO}
+    cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO} -v ${version}
 }
 
 build_debug() {
-    version="10."`date -d"tomorrow" +%y.%m.%d`
-
     echo "mkdir -p /var/www/html/hz/firmware/GXV3380/${version}/user -p"
     echo "cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh"
     if ${ENG}; then
@@ -106,7 +104,7 @@ build_debug() {
         echo "cd ${PROJ_PATH}/cht && ./build.sh -c"
     fi
 
-    echo "cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO}"
+    echo "cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO} -v ${version}"
 }
 
 entrance() {
@@ -135,7 +133,7 @@ do
            ;;
 
         v)
-           export BUILD_CMD="${BUILD_CMD} -v ${OPTARG}"
+           export version=${OPTARG}
            ;;
 
         r)

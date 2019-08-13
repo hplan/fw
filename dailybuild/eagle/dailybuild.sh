@@ -66,7 +66,8 @@ mail() {
         echo "sed -e 's/$/<br>/g' ${Log_Raw} >> ${Log_Pretty}"
         echo "</div></body></html>" >> ${Log_Pretty}
         if ! ${DEBUG}; then
-            sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "${MAIL_TITLE}" < ${Log_Pretty}
+            export version="20."`date -d"today" +%y.%m.%d`
+            sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3350 ${version} git log" < ${Log_Pretty}
         fi
         return 0
     fi
