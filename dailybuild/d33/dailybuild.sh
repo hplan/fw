@@ -75,8 +75,8 @@ mail() {
 }
 
 build() {
-    source ${SH_PATH}/../../env.sh
-    source ${SH_PATH}/../../openjdk-8-env
+    source ${SH_PATH}/../env.sh
+    source ${SH_PATH}/../openjdk-8-env
 
     cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh
     if ${ENG}; then

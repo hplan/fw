@@ -68,8 +68,8 @@ if ${DEBUG}; then
 fi
 
 build() {
-    source ${SH_PATH}/../../env.sh
-    source ${SH_PATH}/../../openjdk-8-env
+    source ${SH_PATH}/../env.sh
+    source ${SH_PATH}/../openjdk-8-env
     cd ${PROJ_TOP}/android && source ${PROJ_TOP}/android/build/envsetup.sh
     if ${ENG}; then
         cd ${PROJ_TOP}/android && lunch full_eagle-eng
