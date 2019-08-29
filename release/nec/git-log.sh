@@ -2,7 +2,7 @@
 
 export VERSION="0.0.0.0"
 export MAIL_TO="hz_gxv33xx@grandstream.cn"
-export PROJ_TOP=/home/hplan/project/eagle
+export PROJ_TOP=/home/hplan/project/itx-3370
 
 Log_Raw="/tmp/logNecRaw.html"
 Log_Pretty="/tmp/logNecPretty.html"
