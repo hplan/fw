@@ -1,14 +1,14 @@
 #!/bin/bash
 source /etc/profile
 export ENG=true
-export DEBUG=true
+export DEBUG=false
 export BUILD_KERNEL=false
 export BRANCH="Bat"
 export MAIL_TO="hz_gxv33xx@grandstream.cn"
 export MAIL_TO_DEBUG="hplan@grandstream.cn"
 export MAIL_TITLE="GXV3370 git log"
 export SH_PATH="$(cd "$(dirname "$0")";pwd)"
-export PROJ_PATH="/media/gshz/newdisk/ahluo/Bat/"
+export PROJ_PATH="/home/hplan/project/dailybuild/bat"
 export BUILD_CMD="./autoBuild.sh"
 
 Log_Raw="/tmp/logRaw_Bat.html"
