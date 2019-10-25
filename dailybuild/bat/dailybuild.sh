@@ -3,6 +3,7 @@ source /etc/profile
 export ENG=true
 export DEBUG=false
 export BUILD_KERNEL=false
+export REPO_SYNC_CODE=false
 export BRANCH="Bat"
 export MAIL_TO="hz_gxv33xx@grandstream.cn"
 export MAIL_TO_DEBUG="hplan@grandstream.cn"
@@ -100,20 +101,25 @@ build_debug() {
     fi
 
     if ${BUILD_KERNEL}; then
-        echo "cd ${PROJ_PATH}/kernel-3.18 && make clean && make distclean && ./buildkernel.sh -b"
+        echo "cd ${PROJ_PATH}/kernel-3.18 && make clean -j8 && make distclean -j8 && ./buildkernel.sh -b"
     fi
 
     echo "cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO}"
 }
 
 entrance() {
-    if ${DEBUG}; then
-        repo_sync_debug
-    else
-        repo_sync
+    ## sync code
+    if ${REPO_SYNC_CODE}; then
+        if ${DEBUG}; then
+            repo_sync_debug
+        else
+            repo_sync
+        fi
+
+        mail ${MAIL_TO}
     fi
 
-    mail ${MAIL_TO}
+    ## build code
     if [[ $? -eq 0 ]]; then
         if ${DEBUG}; then
             build_debug
@@ -123,7 +129,7 @@ entrance() {
     fi
 }
 
-while getopts "v:r:csbh" arg
+while getopts "v:r:csbuh" arg
 do
     case ${arg} in
         h)
@@ -154,6 +160,10 @@ do
 
         c)
            export BUILD_CMD="${BUILD_CMD} -c"
+           ;;
+
+        u)
+           export REPO_SYNC_CODE=true
            ;;
 
         ?)
