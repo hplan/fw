@@ -25,6 +25,7 @@ echo "
     # -c: clean build. default: not clean
     # -b: build kernel
     # -v: set version
+    # -u: update source code. default: not update
 "
 }
 
