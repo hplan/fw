@@ -1,8 +1,9 @@
 #!/bin/bash
 source /etc/profile
 export ENG=true
-export DEBUG=true
+export DEBUG=false
 export BUILD_KERNEL=false
+export REPO_SYNC_CODE=false
 export BRANCH="Alpaca"
 export MAIL_TO="hz_gxv33xx@grandstream.cn"
 export MAIL_TO_DEBUG="hplan@grandstream.cn"
@@ -25,36 +26,29 @@ echo "
     # -c: clean build. default: not clean
     # -b: build kernel
     # -v: set version
+    # -u: update source code. default: not update
 "
 }
 
 repo_sync() {
+    source ${SH_PATH}/../env.sh
     # clear previous log
     cat /dev/null > ${Log_Raw}
     cat /dev/null > ${Log_Pretty}
 
     cd ${PROJ_PATH}
-    repo forall -c "git reset && git checkout . && git checkout ${BRANCH}"
-    repo sync
+    while true
+    do
+        repo forall -c "git reset --hard m/master && git checkout ${BRANCH} && git pull \`git remote\` ${BRANCH}"
+        repo sync -e -c -j8
+
+        if [[ $? -eq 0 ]]; then
+            break
+        fi
+    done
 
     repo forall -c "git pull \`git remote\` ${BRANCH} && git rebase m/master"
     repo forall -p -c  git log  --graph  --name-status --since="22 hours ago" --pretty=format:"<span style='color:#00cc33'>%ci</span>  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span>      <span style='color:yellow'> %B</span>%nFiles List:"  > ${Log_Raw}
-}
-
-repo_sync_debug() {
-    echo "source ${SH_PATH}/../../env.sh"
-    echo "cat /dev/null > ${Log_Raw}"
-    echo "cat /dev/null > ${Log_Pretty}"
-
-    echo "cd ${PROJ_PATH}"
-    echo "repo forall -c \"git reset && git checkout . && git checkout ${BRANCH}\""
-    echo "repo sync"
-
-    echo "repo forall -c \"git pull \`git remote\` ${BRANCH} && git rebase m/master\""
-    echo "repo forall -p -c \"git log  --graph  --name-status --since=\"22 hours ago\" \
---pretty=format:\"<span style='color:#00cc33'>%ci</span> \
- <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span> \
-     <span style='color:yellow'> %B</span>%nFiles List:\"  > ${Log_Raw}"
 }
 
 mail() {
@@ -73,8 +67,8 @@ mail() {
 }
 
 build() {
-    source ${SH_PATH}/../../env.sh
-    source ${SH_PATH}/../../openjdk-8-env
+    source ${SH_PATH}/../env.sh
+    source ${SH_PATH}/../openjdk-8-env
 
     mkdir -p /var/www/html/hz/firmware/GXV3380/${version}/user -p
     cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh
@@ -91,36 +85,13 @@ build() {
     cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO} -v ${version}
 }
 
-build_debug() {
-    echo "mkdir -p /var/www/html/hz/firmware/GXV3380/${version}/user -p"
-    echo "cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh"
-    if ${ENG}; then
-        echo "cd ${PROJ_PATH}/android && lunch cht_alpaca-eng"
-    else
-        echo "cd ${PROJ_PATH}/android && lunch cht_alpaca-user"
-    fi
-
-    if ${BUILD_KERNEL}; then
-        echo "cd ${PROJ_PATH}/cht && ./build.sh -c"
-    fi
-
-    echo "cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO} -v ${version}"
-}
-
 entrance() {
-    if ${DEBUG}; then
-        repo_sync_debug
-    else
+    if ${REPO_SYNC_CODE}; then
         repo_sync
+        mail ${MAIL_TO}
     fi
-
-    mail ${MAIL_TO}
     if [[ $? -eq 0 ]]; then
-        if ${DEBUG}; then
-            build_debug
-        else
-            build
-        fi
+        build
     fi
 }
 
@@ -155,6 +126,10 @@ do
 
         c)
            export BUILD_CMD="${BUILD_CMD} -c"
+           ;;
+
+        u)
+           export REPO_SYNC_CODE=true
            ;;
 
         ?)

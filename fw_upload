@@ -93,7 +93,7 @@ class Upload:
 
         if fw.get_upload_to_ipvt() == 1:
             fw_name_origin = fw.__getattr__("fw_name_origin")
-            print "scp %s hplan@fw.ipvideotalk.com:%s" % (fw_name_origin, ipvt_fw_path)
+            print "scp %s hplan@fw.ipvideotalk.com:%s" % (os.path.join(pack_path, fw_name_origin), ipvt_fw_path)
             os.system("scp %s hplan@fw.ipvideotalk.com:%s" % (os.path.join(pack_path, fw_name_origin), ipvt_fw_path))
 
 
