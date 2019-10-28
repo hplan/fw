@@ -29,14 +29,22 @@ echo "
 }
 
 repo_sync() {
-    source ${SH_PATH}/../../env.sh
+    source ${SH_PATH}/../env.sh
     # clear previous log
     cat /dev/null > ${Log_Raw}
     cat /dev/null > ${Log_Pretty}
 
     cd ${PROJ_PATH}
-    repo forall -c "git reset && git checkout . && git checkout ${BRANCH}"
-    repo sync
+
+    while true
+    do
+        repo forall -c "git reset --hard m/master && git checkout ${BRANCH} && git pull \`git remote\` ${BRANCH}"
+        repo sync -e -c -j8
+
+        if [[ $? -eq 0 ]]; then
+            break
+        fi
+    done
 
     repo forall -c "git pull \`git remote\` ${BRANCH} && git rebase m/master"
     repo forall -p -c  git log  --graph  --name-status --since="24 hours ago" --pretty=format:"<span style='color:#00cc33'>%ci</span>  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span>      <span style='color:yellow'> %B</span>%nFiles List:"  > ${Log_Raw}
@@ -48,8 +56,11 @@ repo_sync_debug() {
     echo "cat /dev/null > ${Log_Pretty}"
 
     echo "cd ${PROJ_PATH}"
-    echo "repo forall -c \"git reset && git checkout . && git checkout ${BRANCH}\""
-    echo "repo sync"
+    while true
+    do
+        echo "repo forall -c \"git reset --hard m/master && git checkout ${BRANCH} && git pull \`git remote\` ${BRANCH}\""
+        echo "repo sync -e -c -j8"
+    done
 
     echo "repo forall -c \"git pull \`git remote\` ${BRANCH} && git rebase m/master\""
     echo "repo forall -p -c \"git log  --graph  --name-status --since=\"24 hours ago\" \
@@ -86,7 +97,11 @@ build() {
     fi
 
     if ${BUILD_KERNEL}; then
-        cd ${PROJ_PATH}/kernel-3.18 && make clean && make distclean && ./buildkernel.sh -b
+        cd ${PROJ_PATH}/kernel-3.18 && ./buildkernel.sh -b
+        if [[ $? -ne 0 ]]; then
+            sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3370 build kernel failed."
+            exit 1
+        fi
     fi
 
     cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO} -g eagle
@@ -101,7 +116,8 @@ build_debug() {
     fi
 
     if ${BUILD_KERNEL}; then
-        echo "cd ${PROJ_PATH}/kernel-3.18 && make clean -j8 && make distclean -j8 && ./buildkernel.sh -b"
+        echo "cd ${PROJ_PATH}/kernel-3.18 && ./buildkernel.sh -b"
+        echo "cd ${PROJ_PATH}/kernel-3.18 && ./buildkernel.sh -b"
     fi
 
     echo "cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO} -g eagle"
