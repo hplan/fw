@@ -40,7 +40,7 @@ repo_sync() {
     while true
     do
         repo forall -c "git reset --hard m/master && git checkout ${BRANCH} && git pull \`git remote\` ${BRANCH}"
-        repo sync -e -c -j8
+        repo sync -c -j16
 
         if [[ $? -eq 0 ]]; then
             break
@@ -95,7 +95,7 @@ entrance() {
     fi
 }
 
-while getopts "v:r:csbh" arg
+while getopts "v:r:csbuh" arg
 do
     case ${arg} in
         h)
