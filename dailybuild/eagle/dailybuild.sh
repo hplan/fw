@@ -11,6 +11,7 @@ export MAIL_TITLE="GXV3350 git log"
 export SH_PATH="$(cd "$(dirname "$0")";pwd)"
 export PROJ_PATH="/home/hplan/project/eagle"
 export BUILD_CMD="./autoBuild.sh"
+export LOG_FILE="/home/hplan/BuildLog/eagle/`whoami`_eagle_20_"`date -d"today" +%y_%m_%d`"_build_Log"
 
 Log_Raw="/tmp/logEagleRaw.html"
 Log_Pretty="/tmp/logEaglePretty.html"
@@ -39,15 +40,15 @@ repo_sync() {
 
     while true
     do
-        repo forall -c "git reset --hard m/master && git checkout ${BRANCH} && git pull \`git remote\` ${BRANCH}"
-        repo sync -e -c -j8
+        repo forall -c "git reset --hard m/master && git checkout ${BRANCH} && git pull \`git remote\` ${BRANCH}" | tee ${LOG_FILE}
+        repo sync -c -j40 | tee ${LOG_FILE}
 
         if [[ $? -eq 0 ]]; then
             break
         fi
     done
 
-    repo forall -c "git pull \`git remote\` ${BRANCH} && git rebase m/master"
+    repo forall -c "git pull \`git remote\` ${BRANCH} && git rebase m/master" | tee ${LOG_FILE}
     repo forall -p -c  git log  --graph  --name-status --since="24 hours ago" --pretty=format:"<span style='color:#00cc33'>%ci</span>  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span>      <span style='color:yellow'> %B</span>%nFiles List:"  > ${Log_Raw}
 }
 
@@ -71,22 +72,22 @@ build() {
     source ${SH_PATH}/../env.sh
     source ${SH_PATH}/../openjdk-8-env
 
-    cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh
+    cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh | tee ${LOG_FILE}
     if ${ENG}; then
-        cd ${PROJ_PATH}/android && lunch full_eagle-eng
+        cd ${PROJ_PATH}/android && lunch full_eagle-eng | tee ${LOG_FILE}
     else
-        cd ${PROJ_PATH}/android && lunch full_eagle-user
+        cd ${PROJ_PATH}/android && lunch full_eagle-user | tee ${LOG_FILE}
     fi
 
     if ${BUILD_KERNEL}; then
-        cd ${PROJ_PATH}/kernel-3.18 && ./buildkernel.sh -b
+        cd ${PROJ_PATH}/kernel-3.18 && ./buildkernel.sh -b | tee ${LOG_FILE}
         if [[ $? -ne 0 ]]; then
             sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3370 build kernel failed."
             exit 1
         fi
     fi
 
-    cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO} -g eagle
+    cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO} -g eagle | tee ${LOG_FILE}
 }
 
 entrance() {
@@ -98,7 +99,7 @@ entrance() {
 
     ## build code
     if [[ $? -eq 0 ]]; then
-        build
+        build ${MAIL_TO}
     fi
 }
 
@@ -145,5 +146,11 @@ do
            ;;
     esac
 done
+
+if ${ENG}; then
+    export LOG_FILE="${LOG_FILE}_eng"
+else
+    export LOG_FILE="${LOG_FILE}_usr"
+fi
 
 entrance

@@ -9,9 +9,10 @@ export MAIL_TO="hz_gxv33xx@grandstream.cn"
 export MAIL_TO_DEBUG="hplan@grandstream.cn"
 export MAIL_TITLE="GXV3380 eng git log"
 export SH_PATH="$(cd "$(dirname "$0")";pwd)"
-export PROJ_PATH="/media/gshz/newdisk/ahluo/Alpaca7"
+export PROJ_PATH="/home/hplan/project/dailybuild/alpaca7_eng"
 export BUILD_CMD="./autoBuild.sh"
 export version="10."`date -d"tomorrow" +%y.%m.%d`
+export LOG_FILE="/home/hplan/BuildLog/alpaca7/`whoami`_alpaca_10_"`date -d"tomorrow" +%y_%m_%d`"_build_Log"
 
 Log_Raw="/tmp/logRaw_Alpaca.html"
 Log_Pretty="/tmp/logPretty_Alpaca.html"
@@ -31,7 +32,7 @@ echo "
 }
 
 repo_sync() {
-    source ${SH_PATH}/../env.sh
+    source ${SH_PATH}/../../env.sh
     # clear previous log
     cat /dev/null > ${Log_Raw}
     cat /dev/null > ${Log_Pretty}
@@ -39,15 +40,15 @@ repo_sync() {
     cd ${PROJ_PATH}
     while true
     do
-        repo forall -c "git reset --hard m/master && git checkout ${BRANCH} && git pull \`git remote\` ${BRANCH}"
-        repo sync -e -c -j8
+        repo forall -c "git reset --hard m/master && git checkout ${BRANCH} && git pull \`git remote\` ${BRANCH}" | tee ${LOG_FILE}
+        repo sync -c -j16 | tee ${LOG_FILE}
 
         if [[ $? -eq 0 ]]; then
             break
         fi
     done
 
-    repo forall -c "git pull \`git remote\` ${BRANCH} && git rebase m/master"
+    repo forall -c "git pull \`git remote\` ${BRANCH} && git rebase m/master" | tee ${LOG_FILE}
     repo forall -p -c  git log  --graph  --name-status --since="22 hours ago" --pretty=format:"<span style='color:#00cc33'>%ci</span>  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span>      <span style='color:yellow'> %B</span>%nFiles List:"  > ${Log_Raw}
 }
 
@@ -67,8 +68,8 @@ mail() {
 }
 
 build() {
-    source ${SH_PATH}/../env.sh
-    source ${SH_PATH}/../openjdk-8-env
+    source ${SH_PATH}/../../env.sh
+    source ${SH_PATH}/../../openjdk-8-env
 
     mkdir -p /var/www/html/hz/firmware/GXV3380/${version}/user -p
     cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh
@@ -79,7 +80,7 @@ build() {
     fi
 
     if ${BUILD_KERNEL}; then
-        cd ${PROJ_PATH}/cht && ./build.sh -c
+        cd ${PROJ_PATH}/cht && ./build.sh -c | tee ${LOG_FILE}
     fi
 
     cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO} -v ${version}
@@ -95,7 +96,7 @@ entrance() {
     fi
 }
 
-while getopts "v:r:csbh" arg
+while getopts "v:r:csbuh" arg
 do
     case ${arg} in
         h)
@@ -138,5 +139,11 @@ do
            ;;
     esac
 done
+
+if ${ENG}; then
+    export LOG_FILE="${LOG_FILE}_eng"
+else
+    export LOG_FILE="${LOG_FILE}_usr"
+fi
 
 entrance
