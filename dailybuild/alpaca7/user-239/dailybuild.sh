@@ -56,8 +56,8 @@ mail() {
         echo "There is no commit, nothing to do"
         return 1
     else
-        echo "\"<html><body  style='background-color:#151515; font-size: 14pt; color: white'><div style='background-color:#151515;color: white'>\" > ${Log_Pretty}"
-        echo "sed -e 's/$/<br>/g' ${Log_Raw} >> ${Log_Pretty}"
+        echo "<html><body  style='background-color:#151515; font-size: 14pt; color: white'><div style='background-color:#151515;color: white'>" > ${Log_Pretty}
+        sed -e 's/$/<br>/g' ${Log_Raw} >> ${Log_Pretty}
         echo "</div></body></html>" >> ${Log_Pretty}
         if ! ${DEBUG}; then
             export version="10."`date -d"today" +%y.%m.%d`
