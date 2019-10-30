@@ -72,11 +72,11 @@ build() {
     source ${SH_PATH}/../env.sh
     source ${SH_PATH}/../openjdk-8-env
 
-    cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh | tee ${LOG_FILE}
+    cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh
     if ${ENG}; then
-        cd ${PROJ_PATH}/android && lunch full_bat-eng | tee ${LOG_FILE}
+        cd ${PROJ_PATH}/android && lunch full_bat-eng
     else
-        cd ${PROJ_PATH}/android && lunch full_bat-user | tee ${LOG_FILE}
+        cd ${PROJ_PATH}/android && lunch full_bat-user
     fi
 
     if ${BUILD_KERNEL}; then

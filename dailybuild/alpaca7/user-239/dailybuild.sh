@@ -82,7 +82,7 @@ build() {
         cd ${PROJ_PATH}/cht && ./build.sh -c | tee ${LOG_FILE}
     fi
 
-    cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO}
+    cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO} | tee ${LOG_FILE}
 }
 
 entrance() {
