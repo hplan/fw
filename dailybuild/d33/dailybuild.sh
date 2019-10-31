@@ -11,7 +11,7 @@ export MAIL_TITLE="GXV3380 OEM D33 git log"
 export SH_PATH="$(cd "$(dirname "$0")";pwd)"
 export PROJ_PATH="/media/gshz/newdisk/ahluo/Alpaca7"
 export BUILD_CMD="./autoBuild.sh"
-export version="54."`date -d"tomorrow" +%y.%m.%d`
+export version="54."`date -d"today" +%y.%m.%d`
 
 Log_Raw="/tmp/logRaw_D33.html"
 Log_Pretty="/tmp/logPretty_D33.html"
