@@ -4,14 +4,15 @@ export ENG=true
 export DEBUG=false
 export BUILD_KERNEL=false
 export REPO_SYNC_CODE=false
-export BRANCH="Bat"
+export BRANCH="GXV3350_AH_SGCC"
 export MAIL_TO="hz_gxv33xx@grandstream.cn"
 export MAIL_TO_DEBUG="hplan@grandstream.cn"
 export MAIL_TITLE="GXV3350 git log"
 export SH_PATH="$(cd "$(dirname "$0")";pwd)"
 export PROJ_PATH="/home/hplan/project/eagle"
 export BUILD_CMD="./autoBuild.sh"
-export LOG_FILE="/home/hplan/BuildLog/eagle/`whoami`_eagle_20_"`date -d"today" +%y_%m_%d`"_build_Log"
+export version="00"`date -d"today"  +%y_%m_%d`
+export LOG_FILE="/home/hplan/BuildLog/eagle/`whoami`_eagle_00_"`date -d"today" +%y_%m_%d`"_build_Log"
 
 Log_Raw="/tmp/logEagleRaw.html"
 Log_Pretty="/tmp/logEaglePretty.html"
@@ -40,7 +41,7 @@ repo_sync() {
 
     while true
     do
-        repo forall -c "git reset --hard m/master && git checkout ${BRANCH} && git pull \`git remote\` ${BRANCH}" | tee ${LOG_FILE}
+        repo forall -c "git reset --hard \`git remote\`/GXV3350_AH_SGCC && git checkout ${BRANCH} && git pull \`git remote\` ${BRANCH}" | tee ${LOG_FILE}
         repo sync -c -j16 | tee ${LOG_FILE}
 
         if [[ $? -eq 0 ]]; then
@@ -48,7 +49,7 @@ repo_sync() {
         fi
     done
 
-    repo forall -c "git pull \`git remote\` ${BRANCH} && git rebase m/master" | tee ${LOG_FILE}
+#    repo forall -c "git pull \`git remote\` ${BRANCH} && git rebase m/master" | tee ${LOG_FILE}
     repo forall -p -c  git log  --graph  --name-status --since="24 hours ago" --pretty=format:"<span style='color:#00cc33'>%ci</span>  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span>      <span style='color:yellow'> %B</span>%nFiles List:"  > ${Log_Raw}
 }
 
@@ -62,7 +63,7 @@ mail() {
         echo "</div></body></html>" >> ${Log_Pretty}
         if ! ${DEBUG}; then
             export version="20."`date -d"today" +%y.%m.%d`
-            sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3350 ${version} git log" < ${Log_Pretty}
+            sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3350 AH_SGCC ${version} git log" < ${Log_Pretty}
         fi
         return 0
     fi
