@@ -4,12 +4,13 @@ export ENG=true
 export DEBUG=false
 export BUILD_KERNEL=false
 export REPO_SYNC_CODE=false
-export BRANCH="Alpaca"
+export TARGET_BRANCH="Alpaca"
+export CURRENT_BRANCH="git symbolic-ref --short HEAD"
 export MAIL_TO="hz_gxv33xx@grandstream.cn"
 export MAIL_TO_DEBUG="hplan@grandstream.cn"
 export MAIL_TITLE="GXV3380 OEM D33 git log"
 export SH_PATH="$(cd "$(dirname "$0")";pwd)"
-export PROJ_PATH="/media/gshz/newdisk/ahluo/Alpaca7"
+export PROJ_PATH="/home/hplan/project/dailybuild/alpaca7_eng"
 export BUILD_CMD="./autoBuild.sh"
 export version="54."`date -d"today" +%y.%m.%d`
 
@@ -39,7 +40,7 @@ repo_sync() {
     cd ${PROJ_PATH}
     while true
     do
-        repo forall -c "git reset --hard m/master && git checkout ${BRANCH} && git pull \`git remote\` ${BRANCH}"
+        repo forall -c "git checkout . && git reset --hard \`git remote\`/\`${CURRENT_BRANCH}\` && git checkout ${TARGET_BRANCH} && git reset --hard m/master && git pull \`git remote\` ${TARGET_BRANCH}"
         repo sync -c -j16
 
         if [[ $? -eq 0 ]]; then
@@ -47,8 +48,8 @@ repo_sync() {
         fi
     done
 
-    repo forall -c "git pull \`git remote\` ${BRANCH} && git rebase m/master"
-    cd ${PROJ_PATH}/cht && git checkout D33 && git pull `git remote` D33
+    repo forall -c "git pull \`git remote\` ${TARGET_BRANCH} && git rebase m/master"
+    cd ${PROJ_PATH}/cht && git reset --hard `git remote`/`${CURRENT_BRANCH}` && git checkout D33 && git reset --hard `git remote`/D33 && git pull `git remote` D33
     repo forall -p -c  git log  --graph  --name-status --since="24 hours ago" --pretty=format:"<span style='color:#00cc33'>%ci</span>  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span>      <span style='color:yellow'> %B</span>%nFiles List:"  > ${Log_Raw}
 }
 
