@@ -4,7 +4,8 @@ export ENG=true
 export DEBUG=false
 export BUILD_KERNEL=false
 export REPO_SYNC_CODE=false
-export BRANCH="Bat"
+export TARGET_BRANCH="Bat"
+export CURRENT_BRANCH="git symbolic-ref --short HEAD"
 export MAIL_TO="hz_gxv33xx@grandstream.cn"
 export MAIL_TO_DEBUG="hplan@grandstream.cn"
 export MAIL_TITLE="GXV3370 git log"
@@ -40,7 +41,7 @@ repo_sync() {
 
     while true
     do
-        repo forall -c "git reset --hard m/master && git checkout ${BRANCH} && git pull \`git remote\` ${BRANCH}" | tee ${LOG_FILE}
+        repo forall -c "git checkout . && git reset --hard \`git remote\`/\`${CURRENT_BRANCH}\` && git checkout ${TARGET_BRANCH} && git reset --hard m/master && git pull \`git remote\` ${TARGET_BRANCH}" | tee ${LOG_FILE}
         repo sync -c -j16 | tee ${LOG_FILE}
 
         if [[ $? -eq 0 ]]; then
@@ -48,7 +49,7 @@ repo_sync() {
         fi
     done
 
-    repo forall -c "git pull \`git remote\` ${BRANCH} && git rebase m/master" | tee ${LOG_FILE}
+    repo forall -c "git pull \`git remote\` ${TARGET_BRANCH} && git rebase m/master" | tee ${LOG_FILE}
     repo forall -p -c  git log  --graph  --name-status --since="24 hours ago" --pretty=format:"<span style='color:#00cc33'>%ci</span>  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span>      <span style='color:yellow'> %B</span>%nFiles List:"  > ${Log_Raw}
 }
 
@@ -81,8 +82,14 @@ build() {
 
     if ${BUILD_KERNEL}; then
         cd ${PROJ_PATH}/kernel-3.18 && ./buildkernel.sh -b | tee ${LOG_FILE}
-        if [[ $? -ne 0 ]]; then
-            sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3370 build kernel failed."
+        # check if there is boot.img
+        if [[ ! -e ${PROJ_PATH}/android/out/target/product/bat/boot.img ]]; then
+            ## regenerate boot.img
+            cd ${PROJ_PATH} && make bootimage -j16
+        fi
+        # check again
+        if [[ ! -e ${PROJ_PATH}/android/out/target/product/bat/boot.img ]]; then
+            sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3350 build kernel failed."
             exit 1
         fi
     fi

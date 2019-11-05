@@ -83,12 +83,12 @@ build() {
     if ${BUILD_KERNEL}; then
         cd ${PROJ_PATH}/kernel-3.18 && ./buildkernel.sh -b | tee ${LOG_FILE}
         # check if there is boot.img
-        if [[ ! -e ${PROJ_PATH}/out/target/product/eagle/boot.img ]]; then
+        if [[ ! -e ${PROJ_PATH}/android/out/target/product/eagle/boot.img ]]; then
             ## regenerate boot.img
             cd ${PROJ_PATH} && make bootimage -j16
         fi
         # check again
-        if [[ ! -e ${PROJ_PATH}/out/target/product/eagle/boot.img ]]; then
+        if [[ ! -e ${PROJ_PATH}/android/out/target/product/eagle/boot.img ]]; then
             sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3350 build kernel failed."
             exit 1
         fi
