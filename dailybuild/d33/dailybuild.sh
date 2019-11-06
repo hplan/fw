@@ -80,6 +80,7 @@ build() {
     fi
 
     if ${BUILD_KERNEL}; then
+        cd ${PROJ_PATH}/cht && git reset --hard `git remote`/`${CURRENT_BRANCH}` && git checkout D33 && git reset --hard `git remote`/D33 && git pull `git remote` D33
         cd ${PROJ_PATH}/cht && ./build.sh -c
     fi
 

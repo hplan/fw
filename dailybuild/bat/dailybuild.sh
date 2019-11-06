@@ -85,7 +85,8 @@ build() {
         # check if there is boot.img
         if [[ ! -e ${PROJ_PATH}/android/out/target/product/bat/boot.img ]]; then
             ## regenerate boot.img
-            cd ${PROJ_PATH} && make bootimage -j16
+            cd ${PROJ_PATH}/android && make bootimage -j16
+            cd ${PROJ_PATH}/kernel-3.18 && ./buildkernel.sh -b | tee ${LOG_FILE}
         fi
         # check again
         if [[ ! -e ${PROJ_PATH}/android/out/target/product/bat/boot.img ]]; then
