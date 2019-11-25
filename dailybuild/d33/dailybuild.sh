@@ -84,16 +84,16 @@ build() {
         cd ${PROJ_PATH}/android && extract-bsp
         cd ${PROJ_PATH}/cht && ./build.sh -c
 
-        if [[ ! -e ${PROJ_PATH}/android/out/target/product/cht_alpaca/boot.img ]]; then
-            ## regenerate boot.img
-            cd ${PROJ_PATH}/android && make bootimage -j16
-            cd ${PROJ_PATH}/cht && ./build.sh -c
-        fi
-        # check again
-        if [[ ! -e ${PROJ_PATH}/android/out/target/product/cht_alpaca/boot.img ]]; then
-            sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3380 eng build kernel failed."
-            exit 1
-        fi
+        #if [[ ! -e ${PROJ_PATH}/android/out/target/product/cht_alpaca/boot.img ]]; then
+        #    ## regenerate boot.img
+        #    cd ${PROJ_PATH}/android && make bootimage -j16
+        #    cd ${PROJ_PATH}/cht && ./build.sh -c
+        #fi
+        ## check again
+        #if [[ ! -e ${PROJ_PATH}/android/out/target/product/cht_alpaca/boot.img ]]; then
+        #    sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3380 eng build kernel failed."
+        #    exit 1
+        #fi
     fi
 
     cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -r ${MAIL_TO} -m 54 -v ${version}
