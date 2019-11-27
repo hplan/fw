@@ -131,7 +131,7 @@ do
 
         s)
            export ENG=false
-           export BUILD_CMD="${BUILD_CMD} -s -p"
+           export BUILD_CMD="${BUILD_CMD} -s"
            ;;
 
         b)
