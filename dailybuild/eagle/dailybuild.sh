@@ -10,7 +10,7 @@ export MAIL_TO="hz_gxv33xx@grandstream.cn"
 export MAIL_TO_DEBUG="hplan@grandstream.cn"
 export MAIL_TITLE="GXV3350 git log"
 export SH_PATH="$(cd "$(dirname "$0")";pwd)"
-export PROJ_PATH="/home/hplan/project/eagle"
+export PROJ_PATH="/home/hplan/project/dailybuild/eagle"
 export BUILD_CMD="./autoBuild.sh"
 export LOG_FILE="/home/hplan/BuildLog/eagle/`whoami`_eagle_20_"`date -d"today" +%y_%m_%d`"_build_Log"
 
