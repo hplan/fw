@@ -4,6 +4,7 @@ export ENG=true
 export DEBUG=false
 export BUILD_KERNEL=false
 export REPO_SYNC_CODE=false
+export CLEAN=false
 export TARGET_BRANCH="Bat"
 export CURRENT_BRANCH="git symbolic-ref --short HEAD"
 export MAIL_TO="hz_gxv33xx@grandstream.cn"
@@ -42,7 +43,7 @@ repo_sync() {
     while true
     do
         repo forall -c "git checkout . && git reset --hard \`git remote\`/\`${CURRENT_BRANCH}\` && git checkout ${TARGET_BRANCH} && git reset --hard m/master && git pull \`git remote\` ${TARGET_BRANCH}" | tee ${LOG_FILE}
-        repo sync -c -j16 | tee ${LOG_FILE}
+        repo sync -c -j8 | tee ${LOG_FILE}
 
         if [[ $? -eq 0 ]]; then
             break
@@ -81,12 +82,16 @@ build() {
         cd ${PROJ_PATH}/android && lunch full_eagle-user
     fi
 
+    if ${CLEAN}; then
+        cd ${PROJ_PATH}/android && make clean
+    fi
+
     if ${BUILD_KERNEL}; then
         cd ${PROJ_PATH}/kernel-3.18 && ./buildkernel.sh -b | tee ${LOG_FILE}
         # check if there is boot.img
         if [[ ! -e ${PROJ_PATH}/android/out/target/product/eagle/boot.img ]]; then
             ## regenerate boot.img
-            cd ${PROJ_PATH}/android && make bootimage -j16
+            cd ${PROJ_PATH}/android && make bootimage -j8
             cd ${PROJ_PATH}/kernel-3.18 && ./buildkernel.sh -b | tee ${LOG_FILE}
         fi
         # check again
@@ -143,6 +148,7 @@ do
 
         c)
            export BUILD_CMD="${BUILD_CMD} -c"
+           export CLEAN=true
            ;;
 
         u)
