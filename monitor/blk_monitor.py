@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 PER_THRESHOLD = 95                  # more than 95% used
 AVL_THRESHOLD = 10 * 1024 * 1024    # available less than 10GB
 SVR_LIST = ['192.168.120.166', '192.168.120.239', '192.168.130.32', '192.168.130.33']
+# SVR_LIST = ['192.168.120.166', '192.168.120.239']
 MAIL_TO = "hplan@grandstream.cn,gwzhang@grandstream.cn,bxpan@grandstream.cn,xlli@grandstream.cn,ahluo@grandstream.cn," \
           "jcai@grandstream.cn"
 TMP_FILE = "/tmp/snmpdf.html"
@@ -72,7 +73,10 @@ def print_sys(respond_list, cb, f):
         total = v[column.__getitem__(2)]
         used = v[column.__getitem__(3)]
         avail = v[column.__getitem__(4)]
-        percent = round((1 - (1.0 * avail / total)) * 100, 2)
+        if total >= (pow(2, 31) - 1) and avail >= (pow(2, 31) - 1):
+            percent = v[column.__getitem__(5)]
+        else:
+            percent = round((1 - (1.0 * avail / total)) * 100, 2)
 
         fmt_val = (v[column.__getitem__(0)], v[column.__getitem__(1)],
             str(round(1.0 * total / 1024 / 1024, 2)) + "G",
@@ -144,9 +148,6 @@ def walk_server(address, callback, f):
 
 if __name__ == '__main__':
     level = {"warning": False}
-
-    # if os.path.exists(TMP_FILE):
-    #     os.remove(TMP_FILE)
 
     with open(TMP_FILE, "w+") as f:
         f.writelines("<html><body>")
