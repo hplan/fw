@@ -8,8 +8,7 @@ from email.mime.text import MIMEText
 
 PER_THRESHOLD = 95                  # more than 95% used
 AVL_THRESHOLD = 10 * 1024 * 1024    # available less than 10GB
-SVR_LIST = ['192.168.120.166', '192.168.120.239', '192.168.130.32', '192.168.130.33']
-# SVR_LIST = ['192.168.120.166', '192.168.120.239']
+SVR_LIST = ['192.168.120.166', '192.168.120.239', '192.168.120.32', '192.168.120.33']
 MAIL_TO = "hplan@grandstream.cn,gwzhang@grandstream.cn,bxpan@grandstream.cn,xlli@grandstream.cn,ahluo@grandstream.cn," \
           "jcai@grandstream.cn"
 TMP_FILE = "/tmp/snmpdf.html"
@@ -21,19 +20,21 @@ def snmp_walk(host, oid):
     return result
 
 
+# 测试用
 def snmp_walk_raw(host, oid):
     result = os.popen('snmpwalk -v 2c -c hplan ' + host + ' ' + oid).read()
     return result
 
 
-def parse_str(data, oid):
+def parse_storage_desc(data, oid):
     if data:
         respond = collections.OrderedDict()
         for d in data:
-            d = d.replace(" ", "").split("=")
-            index = d[0][15 + len(oid):]
-            name = d[1][7:]
-            respond[index] = name
+            d = d.replace(" ", "").replace("HOST-RESOURCES-MIB::", "").split("=")
+            index = d[0][len(oid) + 1:]
+            name = d[1].replace("STRING:", "")
+            if name.startswith("/"):
+                respond[index] = name
         return respond
     else:
         pass
@@ -43,52 +44,13 @@ def parse_int(data, oid):
     if data:
         respond = collections.OrderedDict()
         for d in data:
-            d = d.replace(" ", "").split("=")
-            index = d[0][15 + len(oid):]
-            v = int(d[1][8:])
+            d = d.replace(" ", "").replace("HOST-RESOURCES-MIB::", "").split("=")
+            index = d[0][len(oid) + 1:]
+            v = int(d[1].replace("INTEGER:", "").replace("Bytes", ""))
             respond[index] = v
         return respond
     else:
         pass
-
-
-def print_sys(respond_list, cb, f):
-    column = ["FileSystem", "Mount on",  "Total", "Used", "Avail", "Percent"]
-
-    rev_map = collections.OrderedDict()
-    for k in respond_list[0].keys():
-        i = 0
-        v = {}
-        for col in column:
-            v[col] = respond_list.__getitem__(i).get(k)
-            i = i+1
-        rev_map[k] = v
-
-    f.writelines("<pre>%-15s%-30s%-10s%-10s%-10s%-10s</pre>" % tuple(column))
-    for k, v in rev_map.iteritems():
-        if v[column.__getitem__(2)] == 0 or v[column.__getitem__(3)] == 0 \
-                or v[column.__getitem__(4)] == 0 or v[column.__getitem__(5)] == 0:
-            continue
-
-        total = v[column.__getitem__(2)]
-        used = v[column.__getitem__(3)]
-        avail = v[column.__getitem__(4)]
-        if total >= (pow(2, 31) - 1) and avail >= (pow(2, 31) - 1):
-            percent = v[column.__getitem__(5)]
-        else:
-            percent = round((1 - (1.0 * avail / total)) * 100, 2)
-
-        fmt_val = (v[column.__getitem__(0)], v[column.__getitem__(1)],
-            str(round(1.0 * total / 1024 / 1024, 2)) + "G",
-            str(round(1.0 * used / 1024 / 1024, 2)) + "G",
-            str(round(1.0 * avail / 1024 / 1024, 2)) + "G",
-            str(percent) + "%")
-        if percent > PER_THRESHOLD and avail < AVL_THRESHOLD:
-            cb["warning"] = True
-            f.writelines("<pre style='color:Red;font-weight:bold;'>%-15s%-30s%-10s%-10s%-10s%-10s</pre>" % fmt_val)
-        else:
-            f.writelines("<pre>%-15s%-30s%-10s%-10s%-10s%-10s</pre>" % fmt_val)
-    f.writelines("<br/><HR/>")
 
 
 def send_mail(username, passwd, recv, title, content, mail_host='smtp.qiye.163.com', port=25):
@@ -116,6 +78,45 @@ def send_mail(username, passwd, recv, title, content, mail_host='smtp.qiye.163.c
     print('email send success.')
 
 
+def get_human_reading_size(size):
+    a = round(1.0 * size / 1024 / 1024, 2)
+    if a > 2048:
+        return str(round(1.0 * a / 1024, 2)) + "G"
+    else:
+        return str(a) + "M"
+
+
+def print_sys(dev_desc, dev_size, dev_used, cb):
+    column = ["Mount on", "Total", "Used", "Avail", "Percent"]
+
+    f.writelines("<pre>%-30s%-10s%-10s%-10s%-10s</pre>" % tuple(column))
+
+    for k, v in dev_desc.iteritems():
+        total = dev_size.get(k)
+        used = dev_used.get(k)
+        if not total:
+            total = 0
+        if not used:
+            used = 0
+
+        avail = total - used
+        if used == 0 and total == 0:
+            used_per = 0
+        else:
+            used_per = round((1.0 * used / total) * 100, 2)
+
+        fmt_val = (v, get_human_reading_size(total), get_human_reading_size(used), get_human_reading_size(avail),
+                   str(used_per) + "%")
+
+        print "%-30s%-10s%-10s%-10s%-10s" % fmt_val
+        if used_per > PER_THRESHOLD and avail < AVL_THRESHOLD:
+            cb["warning"] = True
+            f.writelines("<pre style='color:Red;font-weight:bold;'>%-30s%-10s%-10s%-10s%-10s</pre>" % fmt_val)
+        else:
+            f.writelines("<pre>%-30s%-10s%-10s%-10s%-10s</pre>" % fmt_val)
+    f.writelines("<br/><HR/>")
+
+
 def walk_server(address, callback, f):
     if address:
         target = address
@@ -124,26 +125,35 @@ def walk_server(address, callback, f):
 
     f.writelines("<h1>%s</h1>" % target)
 
-    cmd_list = ["dskDevice", "dskPath"]
     if sys.argv.__len__() != 1:
         target = sys.argv[1]
 
-    respond_list = []
-    for cmd in cmd_list:
-        data = snmp_walk(target, cmd)
-        resp = parse_str(data, cmd)
-        respond_list.append(resp)
+    #
+    data = snmp_walk(target, "hrStorageDescr")
+    dev_desc_resp = parse_storage_desc(data, "hrStorageDescr")
 
-    cmd_list = ["dskTotal", "dskUsed", "dskAvail", "dskPercent"]
-    for cmd in cmd_list:
-        data = snmp_walk(target, cmd)
-        resp = parse_int(data, cmd)
-        respond_list.append(resp)
+    # 簇的大小
+    cluster_units = snmp_walk(target, "hrStorageAllocationUnits")
+    cluster_units_resp = parse_int(cluster_units, "hrStorageAllocationUnits")
 
-    if respond_list:
-        print_sys(respond_list, callback, f)
-    else:
-        print "Unknown error"
+    # 簇的数目
+    cluster_size = snmp_walk(target, "hrStorageSize")
+    cluster_size_resp = parse_int(cluster_size, "hrStorageSize")
+
+    # 使用多少, 跟总容量相除就是占用率
+    used_data = snmp_walk(target, "hrStorageUsed")
+    cluster_used_resp = parse_int(used_data, "hrStorageUsed")
+
+    dev_size_resp = collections.OrderedDict()
+    dev_used_resp = collections.OrderedDict()
+    for k, v in cluster_units_resp.iteritems():
+        if k in cluster_size_resp:
+            dev_size_resp[k] = cluster_size_resp.get(k) * v
+            dev_used_resp[k] = cluster_used_resp.get(k) * v
+        else:
+            continue
+
+    print_sys(dev_desc_resp, dev_size_resp, dev_used_resp, callback)
 
 
 if __name__ == '__main__':
