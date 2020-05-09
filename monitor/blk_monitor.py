@@ -108,7 +108,6 @@ def print_sys(dev_desc, dev_size, dev_used, cb):
         fmt_val = (v, get_human_reading_size(total), get_human_reading_size(used), get_human_reading_size(avail),
                    str(used_per) + "%")
 
-        print "%-30s%-10s%-10s%-10s%-10s" % fmt_val
         if used_per > PER_THRESHOLD and avail < AVL_THRESHOLD:
             cb["warning"] = True
             f.writelines("<pre style='color:Red;font-weight:bold;'>%-30s%-10s%-10s%-10s%-10s</pre>" % fmt_val)
