@@ -13,6 +13,7 @@ sudo apt-get install bison -y
 sudo apt-get install libglib2.0-0:i386 libpng12-0:i386 libfontconfig1:i386 libsm6:i386 libxrender1:i386 -y
 sudo apt-get install email mailutils -y
 sudo apt-get install autoconf -y
+sudo apt-get install bc -y
 
 git config --global alias.path '!echo $user "\033[32m `git branch | grep "*"` \033[0m   `pwd`"'
 git config --global alias.since '!sh -c "git log ...$1"'

@@ -12,7 +12,7 @@ export MAIL_TITLE="GVC3212 git log"
 export SH_PATH="$(cd "$(dirname "$0")";pwd)"
 export PROJ_PATH="/media/gshz/4T_Disk/gvc3212"
 export BUILD_CMD="./autoBuild.sh"
-export LOG_FILE="/home/hplan/BuildLog/eagle/`whoami`_gvc3212_10_"`date -d"today" +%y_%m_%d`"_build_Log"
+export LOG_FILE="/media/gshz/4T_Disk/hplan/BuildLog/gvc3212/`whoami`_gvc3212_10_"`date -d"today" +%y_%m_%d`"_build_Log"
 
 Log_Raw="/tmp/logGVC3212Raw.html"
 Log_Pretty="/tmp/logGVC3212Pretty.html"
