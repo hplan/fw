@@ -77,18 +77,18 @@ class Upload:
         ipvt_fw_path = fw.__getattr__("ipvt_fw_path")
         pack_path = os.path.join(os.path.abspath(os.path.curdir), fw.get_product(), fw.get_version())
 
-        print "* cd /home/hplan/opengoo/ && ./OpengooMain.py -p '%s' -m '%s' -l %s" \
+        print "* cd ./opengoo/ && ./OpengooMain.py -p '%s' -m '%s' -l %s" \
               % (product, module, os.path.join(pack_path, fw_name_pack))
         os.system(
-            "cd /home/hplan/opengoo/ && ./OpengooMain.py -p '%s' -m '%s' -l %s"
+            "cd ./opengoo/ && ./OpengooMain.py -p '%s' -m '%s' -l %s"
             % (product, module, os.path.join(pack_path, fw_name_pack)))
 
         if not fw.get_upload_bin_only() == 1:
             img_name_pack = fw.__getattr__("img_name_pack")
-            print "* cd /home/hplan/opengoo/ && ./OpengooMain.py -p '%s' -m '%s' -l %s" \
+            print "* cd ./opengoo/ && ./OpengooMain.py -p '%s' -m '%s' -l %s" \
                   % (product, module, os.path.join(pack_path, img_name_pack))
             os.system(
-                "cd /home/hplan/opengoo/ && ./OpengooMain.py -p '%s' -m '%s' -l %s"
+                "cd ./opengoo/ && ./OpengooMain.py -p '%s' -m '%s' -l %s"
                 % (product, module, os.path.join(pack_path, img_name_pack)))
 
         if fw.get_upload_to_ipvt() == 1:
@@ -147,8 +147,14 @@ class Pack:
             print "*"
             Pack.check_exists(img_origin)
             # copy img
-            print "* cd %s && cp %s %s" % (new_dir, img_origin, img_name_pack)
-            os.system("cd %s && cp %s %s" % (new_dir, img_origin, img_name_pack))
+            if "gvc3212" == product or "gvc3212_c03" == product:
+                print "* cd %s && cp %s %s" % (new_dir, img_origin, img_name_origin)
+                os.system("cd %s && cp %s %s" % (new_dir, img_origin, img_name_origin))
+                os.system("cd %s && zip %s %s" % (new_dir, img_name_pack, img_name_origin))
+            else:
+                print "* cd %s && cp %s %s" % (new_dir, img_origin, img_name_pack)
+                os.system("cd %s && cp %s %s" % (new_dir, img_origin, img_name_pack))
+
             # shutil.copy(img_origin, img_name_pack)
         # md5sum check
         print "*"
@@ -177,6 +183,8 @@ OPTIONS
                               alpaca      GXV3380
                               nec         GXV3370 OEM (NEC)
                               d33         GXV3380 OEM (CMCC)
+                              gvc3212     GVC3212
+                              gvc3212_c03 GVC3212 HW C03
         
     -s  --user              Specify firmware build type as user, default was eng.
     

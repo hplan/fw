@@ -100,7 +100,7 @@ entrance() {
     fi
 }
 
-while getopts "v:r:csuh" arg
+while getopts "v:r:csuhk" arg
 do
     case ${arg} in
         h)
@@ -132,6 +132,10 @@ do
 
         u)
            export REPO_SYNC_CODE=true
+           ;;
+
+        k)
+           export BUILD_CMD="${BUILD_CMD} -k v1.1A"
            ;;
 
         ?)
