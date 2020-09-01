@@ -79,6 +79,11 @@ build() {
 
     if ${BUILD_KERNEL}; then
         cd ${PROJ_TOP}/kernel-3.18 && ./buildkernel.sh -b
+
+        if [ $? != 0 ]; then
+            echo "FATAL: build bootimage failed!"
+            exit 1
+        fi
     fi
 
     cd ${PROJ_TOP}/android/vendor/grandstream/build && ${BUILD_CMD} -r ${MAIL_TO}

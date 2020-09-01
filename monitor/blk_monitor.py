@@ -6,8 +6,8 @@ import collections
 import smtplib
 from email.mime.text import MIMEText
 
-PER_THRESHOLD = 95                  # more than 95% used
-AVL_THRESHOLD = 10 * 1024 * 1024    # available less than 10GB
+PER_THRESHOLD = 90                         # more than 95% used
+AVL_THRESHOLD = 20 * 1024 * 1024 * 1024    # available less than 10GB
 SVR_LIST = ['192.168.120.166', '192.168.120.239', '192.168.120.32', '192.168.120.33', '192.168.120.240']
 MAIL_TO = "hplan@grandstream.cn,gwzhang@grandstream.cn,bxpan@grandstream.cn,xlli@grandstream.cn,ahluo@grandstream.cn," \
           "jcai@grandstream.cn,zhxxiao@grandstream.cn,mjli@grandstream.cn,xhwu@grandstream.cn"
