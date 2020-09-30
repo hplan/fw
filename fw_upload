@@ -185,6 +185,8 @@ OPTIONS
                               d33         GXV3380 OEM (CMCC)
                               gvc3212     GVC3212
                               gvc3212_c03 GVC3212 HW C03
+                              itsv-3      GXV3370 OEM (ZENITEL)
+                              nec-rcp     GXV3370 OEM (NEC Reception Terminal)
         
     -s  --user              Specify firmware build type as user, default was eng.
     
