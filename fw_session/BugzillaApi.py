@@ -43,13 +43,14 @@ class BugzillaApi:
         path = bugzilla_api.get_req_path(bugzilla_api.REQ_INTERFACE.Login)
 
         url = self.host + "/" + path
-        print "url: " + url
         tk = bugzilla_api.login(url, self.user, self.pwd)
         if tk:
+            self.token = tk
             self.bz.set_token(tk)
             executor.bz_update(self.bz)
 
     def get_bug_info(self, bug_id):
+        self.do_login()
         path = bugzilla_api.get_req_path(bugzilla_api.REQ_INTERFACE.Bug) % str(bug_id)
         url = self.host + "/" + path
 
@@ -68,6 +69,7 @@ class BugzillaApi:
             self.get_bug_info(bug_id)
 
     def get_bugs_info(self, bug_ids):
+        self.do_login()
         path = bugzilla_api.get_req_path(bugzilla_api.REQ_INTERFACE.Search)
         url = self.host + "/" + path
         query = {
@@ -97,6 +99,7 @@ class BugzillaApi:
 #        return data
 
     def get_release_note(self):
+        self.do_login()
         path = bugzilla_api.get_req_path(bugzilla_api.REQ_INTERFACE.Search)
         url = self.host + "/" + path
         query = {
@@ -123,6 +126,7 @@ class BugzillaApi:
             self.get_release_note()
 
     def comment(self, bug_id, comment):
+        self.do_login()
         path = bugzilla_api.get_req_path(bugzilla_api.REQ_INTERFACE.Update_Bug)
         path = path % bug_id
         url = self.host + "/" + path
@@ -135,6 +139,7 @@ class BugzillaApi:
         print r.json()
 
     def get_comment(self, bug_id):
+        self.do_login()
         path = bugzilla_api.get_req_path(bugzilla_api.REQ_INTERFACE.Update_Bug)
         path = path % bug_id
         url = self.host + "/" + path

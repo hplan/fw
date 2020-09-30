@@ -16,7 +16,6 @@ class REQ_INTERFACE:
 
 
 def login(url, usr, pwd):
-    print "do func: login"
     query = {"login": usr, "password": pwd}
     r = requests.get(url, params=query)
     if 200 <= r.status_code <= 299:
@@ -31,7 +30,6 @@ def login(url, usr, pwd):
 
 
 def valid_login(url, user, token):
-    print "do func: valid_login"
     query = {"login": user, "token": token}
     r = requests.get(url, params=query)
     if r.status_code == 200:
