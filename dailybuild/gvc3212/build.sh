@@ -41,7 +41,7 @@ repo_sync() {
 
     while true
     do
-        repo forall -c "git checkout . && git reset --hard \`git remote\`/\`${CURRENT_BRANCH}\` && git checkout ${TARGET_BRANCH} && git reset --hard m/master && git pull \`git remote\` ${TARGET_BRANCH}" | tee ${LOG_FILE}
+        repo forall -c "git checkout -f && git reset --hard \`git remote\`/\`${CURRENT_BRANCH}\` && git checkout ${TARGET_BRANCH} && git reset --hard m/master && git pull \`git remote\` ${TARGET_BRANCH}" | tee ${LOG_FILE}
         repo sync -c -j8 | tee ${LOG_FILE}
 
         if [[ $? -eq 0 ]]; then
