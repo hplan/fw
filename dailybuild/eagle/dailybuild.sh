@@ -56,7 +56,7 @@ repo_sync() {
 
 mail() {
     if [[ $(stat -c %s ${Log_Raw}) -eq 0 ]]; then
-        echo "There is no commit, nothing to do"
+        echo "There is no new commit, nothing to do" | tee ${LOG_FILE}
         return 1
     else
         echo "<html><body  style='background-color:#151515; font-size: 14pt; color: white'><div style='background-color:#151515;color: white'>" > ${Log_Pretty}

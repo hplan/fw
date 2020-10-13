@@ -13,6 +13,7 @@ export SH_PATH="$(cd "$(dirname "$0")";pwd)"
 export PROJ_PATH="/home/hplan/project/dailybuild/alpaca7_eng"
 export BUILD_CMD="./autoBuild.sh"
 export version="54."`date -d"today" +%y.%m.%d`
+export LOG_FILE="/home/hplan/BuildLog/d33/`whoami`_d33_54_"`date -d"today" +%y_%m_%d`"_build_Log"
 
 Log_Raw="/tmp/logRaw_D33.html"
 Log_Pretty="/tmp/logPretty_D33.html"
@@ -40,22 +41,22 @@ repo_sync() {
     cd ${PROJ_PATH}
     while true
     do
-        repo forall -c "git checkout . && git reset --hard \`git remote\`/\`${CURRENT_BRANCH}\` && git checkout ${TARGET_BRANCH} && git reset --hard m/master && git pull \`git remote\` ${TARGET_BRANCH}"
-        repo sync -c -j16
+        repo forall -c "git checkout . && git reset --hard \`git remote\`/\`${CURRENT_BRANCH}\` && git checkout ${TARGET_BRANCH} && git reset --hard m/master && git pull \`git remote\` ${TARGET_BRANCH}" | tee ${LOG_FILE}
+        repo sync -c -j16 | tee ${LOG_FILE}
 
         if [[ $? -eq 0 ]]; then
             break
         fi
     done
 
-    repo forall -c "git pull \`git remote\` ${TARGET_BRANCH} && git rebase m/master"
+    repo forall -c "git pull \`git remote\` ${TARGET_BRANCH} && git rebase m/master" | tee ${LOG_FILE}
     cd ${PROJ_PATH}/cht && git reset --hard `git remote`/`${CURRENT_BRANCH}` && git checkout D33 && git reset --hard `git remote`/D33 && git pull `git remote` D33
     repo forall -p -c  git log  --graph  --name-status --since="24 hours ago" --pretty=format:"<span style='color:#00cc33'>%ci</span>  <span style='color:yellow'>%an %ae</span>%n<span style='color:#00cc33'>Log:</span>      <span style='color:yellow'> %B</span>%nFiles List:"  > ${Log_Raw}
 }
 
 mail() {
     if [[ $(stat -c %s ${Log_Raw}) -eq 0 ]]; then
-        echo "There is no commit, nothing to do"
+        echo "There is no new commit, nothing to do"  | tee ${LOG_FILE}
         return 1
     else
         echo "<html><body  style='background-color:#151515; font-size: 14pt; color: white'><div style='background-color:#151515;color: white'>" > ${Log_Pretty}
@@ -106,7 +107,7 @@ entrance() {
         mail ${MAIL_TO}
     fi
     if [[ $? -eq 0 ]]; then
-        build ${MAIL_TO}
+        build
     fi
 }
 
