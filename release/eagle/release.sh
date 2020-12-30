@@ -78,7 +78,7 @@ build() {
     fi
 
     if ${BUILD_KERNEL}; then
-        cd ${PROJ_TOP}/kernel-3.18 && ./buildkernel.sh -b
+        cd ${PROJ_TOP}/kernel-3.18 && ./buildkernel.sh -k
 
         if [ $? != 0 ]; then
             echo "FATAL: build bootimage failed!"
