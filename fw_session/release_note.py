@@ -25,49 +25,56 @@ def run():
         print "Please continue after your personal information is perfected. "
         exit(0)
 
-    print "*" * 50
+    print "\nRelease tools\n"
+    print "  All git logs will saved in fw/fw_session/git-logs.txt"
+    print "  All resolved bugs will saved in fw/fw_session/resolved_bugs.txt"
+    print ""
+    print ">> Products:"
     for pd in prods:
-        print "%1s %-10s: %-34s %s" % ("*", "id", pd['id'], "*")
-        print "%1s %-10s: %-34s %s" % ("*", "name", pd['name'], "*")
-        print "%1s %-10s: %-34s %s" % ("*", "alias", pd['alias'], "*")
-        print "%1s %-10s: %-34s %s" % ("*", "dir", pd['dir'], "*")
-        print "%1s %-46s %s" % ("*", " ", "*")
+        print "   --------------------------------------------------------"
+        print "     id:    |", pd['id']
+        print "     name:  |", pd['name']
+        print "     alias: |", pd['alias']
+        print "     dir:   |", pd['dir']
+    print "   --------------------------------------------------------"
 
     while True:
-        rid = raw_input("%1s %-20s" % ("*", "choose product id: "))
+        rid = raw_input("* Choose product id: ")
         if not rid.isdigit():
-            print "%1s %-46s %s" % ("*", "product id must be a number, unknown id: %s" % rid, "*")
+            print "Unknown combo {0}\n".format(rid)
         else:
             save_product(rid)
             break
 
-    tag = raw_input("%1s %-20s" % ("*", "input compare tag: "))
+    tag = raw_input("* Input the compare tag: ")
     git_log_dir = git_utils.get_git_logs(tag)
     print " "
-    print " git logs since %s:" % tag
+    print ">> Git commit:"
+    print "   >> Git logs since %s:" % tag
     bugs = git_utils.parse_git_logs(git_log_dir)
     controller.get_bugs_info(bugs)
     print " "
-    print " RESOLVED FIXED bugs on Bugzilla: "
+    print ">> Bugzilla:"
+    print "   >> RESOLVED FIXED bugs:"
     bug_ids = controller.get_release_note()
 
     # add comment support
     # ask for comment intent
     print " "
-    post = raw_input("%1s %-20s" % ("*", "do you want to comment on these bug? (Y/N) "))
+    post = raw_input("* Do you want to comment on these bug? (Y/N) ")
     if post == 'Y' or post == 'y':
         pass
     else:
         exit(0)
 
     # get input comment
-    comment = raw_input("%1s %-20s" % ("*", "input the comment: \n"))
+    comment = raw_input("* Input the comment: \n")
     print " "
     print "* your comment is: \n %s" % comment
 
     # secondary confirm
     print " "
-    post = raw_input("%1s %-20s" % ("*", "Are you sure to comment on these bug? (Y/N) "))
+    post = raw_input("* Are you sure to comment on these bug? (Y/N) ")
     if post == 'Y' or post == 'y':
         pass
     else:

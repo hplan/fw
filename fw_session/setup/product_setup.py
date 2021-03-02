@@ -9,106 +9,100 @@ executor = db.DatabaseExecutor()
 
 
 def new_product():
+    print "\n>> New product:\n"
     # print host
-    name = raw_input("%1s %-14s" % ("*", "product name: "))
+    name = raw_input("   Product name: ")
     # print name
-    alias = raw_input("%1s %-14s" % ("*", "product alias: "))
+    alias = raw_input("   Product alias: ")
     # print pwd
-    pdir = raw_input("%1s %-14s" % ("*", "product dir: "))
+    pdir = raw_input("   Product dir: ")
 
     pd = Product.Product()
     pd.set("name", name)
     pd.set("alias", alias)
     pd.set("dir", pdir)
     executor.prod_add(pd)
-    print "%1s %-46s %s" % ("*", " ", "*")
-    print "%1s %-46s %s" % ("*", "product created.", "*")
+    print "\n   Product created."
 
 
 def edit_product(pds):
-    print "%1s %-46s %s" % ("*", " ", "*")
+    print "\n>> Products:"
+    print "   " + "-" * 60
     for pd in pds:
-        print "%1s %-10s: %-34s %s" % ("*", "id", pd['id'], "*")
-        print "%1s %-10s: %-34s %s" % ("*", "name", pd['name'], "*")
-        print "%1s %-10s: %-34s %s" % ("*", "alias", pd['alias'], "*")
-        print "%1s %-10s: %-34s %s" % ("*", "dir", pd['dir'], "*")
-        print "%1s %-46s %s" % ("*", " ", "*")
+        print "     id:    |", pd['id']
+        print "     name:  |", pd['name']
+        print "     alias: |", pd['alias']
+        print "     dir:   |", pd['dir']
+        print "   " + "-" * 60
 
     # get user input
     while True:
-        print "%1s %-46s %s" % ("*", "-" * 46, "*")
-        rid = raw_input("%1s %-20s" % ("*", "choose product id:"))
+        rid = raw_input("   * Choose product id: ")
         if not rid.isdigit():
-            print "%1s %-46s %s" % ("*", " %s is not a number" % rid, "*")
+            print "     Unknown combo {0}\n".format(rid)
         else:
             break
-
+    print """
+      >> Operations:\n
+         1.Update name
+         2.Update alias
+         3.Update dir
+         4.Exit
+"""
     while True:
-        print "%1s %-46s %s" % ("*", "-" * 46, "*")
-        print "%1s %-46s %s" % ("*", " ", "*")
-        print "%1s %-46s %s" % ("*", "1. update name", "*")
-        print "%1s %-46s %s" % ("*", "2. update alias", "*")
-        print "%1s %-46s %s" % ("*", "3. update dir", "*")
-        print "%1s %-46s %s" % ("*", "4. exit", "*")
-        print "%1s %-46s %s" % ("*", " ", "*")
-
-        combo = raw_input("%1s %-25s" % ("*", "what do you want to do: "))
+        combo = raw_input("         * What do you want to do: ")
         if not combo.isdigit():
-            print "%1s %-46s %s" % ("*", " %s is not a number" % combo, "*")
+            print "           Unknown combo {0}\n".format(combo)
         elif int(combo) == 1:
-            name = raw_input("%1s %-14s" % ("*", "product name: "))
+            name = raw_input("           Product name: ")
             pd = Product.Product()
             pd.set("name", name)
             prod_update(pd, rid)
         elif int(combo) == 2:
-            alias = raw_input("%1s %-14s" % ("*", "product alias: "))
+            alias = raw_input("           Product alias: ")
             pd = Product.Product()
             pd.set("alias", alias)
             prod_update(pd, rid)
         elif int(combo) == 3:
-            pdir = raw_input("%1s %-14s" % ("*", "product dir: "))
+            pdir = raw_input("           Product dir: ")
             pd = Product.Product()
             pd.set("dir", pdir)
             prod_update(pd, rid)
         elif int(combo) == 4:
-            print ("*" * 50)
             exit(0)
         else:
-            print "%1s %-46s %s" % ("*", "unknown combo %s" % combo, "*")
+            print "           Unknown combo {0}\n".format(combo)
 
 
 def prod_update(pd, rid):
     executor.prod_update(pd, int(rid))
-    print "%1s %-46s %s" % ("*", "product updated.", "*")
+    print "           product updated.\n"
 
 
 def product_setup():
-    print "%1s %-46s %s" % ("*", " ", "*")
+    print "\n>> Operations:"
     products = executor.prod_query()
     if not products:
-        print "%1s %-46s %s" % ("*", "did not find product", "*")
-        print "%1s %-46s %s" % ("*", " ", "*")
         new_product()
     else:
-        print "%1s %-46s %s" % ("*", "1. add product", "*")
-        print "%1s %-46s %s" % ("*", "2. update product", "*")
-        print "%1s %-46s %s" % ("*", "3. exit", "*")
-        print "%1s %-46s %s" % ("*", " ", "*")
-
+        print """
+   1.Add product
+   2.Update product
+   3.Exit
+"""
         while True:
-            print ("*" * 50)
-            combo = raw_input("%1s %-25s" % ("*", "what do you want to do: "))
+            combo = raw_input("* What do you want to do: ")
             if not combo.isdigit():
-                print "%1s %-46s %s" % ("*", " %s is not a number" % combo, "*")
+                print "Unknown combo {0}\n".format(combo)
             elif int(combo) == 1:
                 new_product()
+                print ""
             elif int(combo) == 2:
                 edit_product(products)
             elif int(combo) == 3:
-                print ("*" * 50)
                 exit(0)
             else:
-                print "%1s %-46s %s" % ("*", "unknown combo %s" % combo, "*")
+                print "Unknown combo {0}\n".format(combo)
 
 
 def run():

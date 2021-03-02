@@ -11,18 +11,16 @@ executor = db.DatabaseExecutor()
 
 def run():
     print """
-    Tools setup process
-        1. setup bugzilla profile configuration
-        2. setup product configuration
-        3. exit
+    Release tool setup
+    1.setup bugzilla profile
+    2.setup product
+    3.exit setup
     """
     while True:
-        print ("*" * 50)
-        combo = raw_input("%1s %-25s" % ("*", "what do you want to do: "))
+        combo = raw_input("* What do you want to do: ")
         if not combo.isdigit():
-            print "%1s %-46s %s" % ("*", " %s is not a number" % combo, "*")
+            print "Unknown combo {0}\n".format(combo)
         elif int(combo) == 3:
-            print ("*" * 50)
             exit(0)
         elif int(combo) == 1:
             bz_setup.run()
@@ -30,7 +28,7 @@ def run():
             product_setup.run()
             pass
         else:
-            print "%1s %-46s %s" % ("*", "unknown combo %s" % combo, "*")
+            print "Unknown combo {0}\n".format(combo)
 
 
 def on_signal_interrupt(signal, frame):

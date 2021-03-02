@@ -2,7 +2,9 @@
 import rest_api.bugzilla_api as bugzilla_api
 import requests
 import ConfigParser
+import model.Bug as Bug
 import model.DatabaseExecutor as model
+
 executor = model.DatabaseExecutor()
 
 
@@ -34,7 +36,6 @@ class BugzillaApi:
         url = self.host + "/" + valid_path
         # valid login
         if bugzilla_api.valid_login(url, self.user, self.token):
-            print "token valid"
             return
         else:
             print "exists token was invalid. request login..."
@@ -62,7 +63,12 @@ class BugzillaApi:
             resolution = data['bugs'][0]['resolution']
             bug_id = data['bugs'][0]['id']
             summary = data['bugs'][0]['summary']
-            print "%8s %8s [Bug %s] %s" % (status, resolution, bug_id, summary)
+            print "%8s %8s [Bug %s] %s" % (
+                    self.compat(status),
+                    self.compat(resolution),
+                    self.compat(bug_id),
+                    self.compat(summary)
+            )
         elif r.status_code == 401:
             self.do_login()
             self.load_cfg()
@@ -88,15 +94,65 @@ class BugzillaApi:
                     resolution = d['resolution']
                     bug_id = d['id']
                     summary = d['summary']
-                    print "%10s %10s %10s [Bug %s] %s" % (product, status, resolution, bug_id, summary)
-                print("\n")
-                print " total: %d" % len(data['bugs'])
+                    print "      %s %10s %10s [Bug %s] %s" % (
+                        self.compat(product),
+                        self.compat(status),
+                        resolution.encode("ascii", "ignore"),
+                        bug_id,
+                        self.compat(summary)
+                    )
+                print "   >> Total commits: %d" % len(data['bugs'])
             return data
         elif r.status_code == 401:
             self.do_login()
             self.load_cfg()
             self.get_bugs_info(bug_ids)
 #        return data
+
+    def search_bug(self):
+        self.do_login()
+        url = self.host + "/rest/bug?product=GXV3350&product=GXV3380&product=GXV33xx"
+        print url
+        query = {
+            "token": self.token
+        }
+        r = requests.get(url, params=query)
+        search_ret = []
+        if r.status_code == 200:
+            data = r.json()
+            if data:
+                for d in data['bugs']:
+                    bug = Bug.Bug()
+                    bug.set("id", d['id'])
+                    bug.set("creator", d['creator'])
+                    bug.set("product", d['product'])
+                    bug.set("status", d['status'])
+                    bug.set("component", d['component'])
+                    bug.set("resolution", d['resolution'])
+                    bug.set("summary", d['summary'])
+                    bug.set("creation_time", d['creation_time'])
+                    bug.set("last_change_time", d['last_change_time'])
+
+                    # if bug.get_creator() != reporter:
+                    #     continue
+                    status = bug.get_status()
+                    if status == 'CLOSED' or status == 'VERIFIED':
+                        continue
+                    elif status == 'RESOLVED':
+                        resolution = bug.get_resolution()
+                        if resolution != 'FIXED':
+                            continue
+
+                    search_ret.append(bug)
+                    print "%10s %10s %10s [Bug %s] %s" % (bug.get_product(), bug.get_status(), bug.get_resolution(),
+                                                          bug.get_id(), bug.get_summary())
+                print("\n")
+                print " total: %d" % len(data['bugs'])
+            return search_ret
+        elif r.status_code == 401:
+            self.do_login()
+            self.load_cfg()
+            self.search_bug()
 
     def get_release_note(self):
         self.do_login()
@@ -114,11 +170,13 @@ class BugzillaApi:
             bugs = data['bugs']
             if bugs:
                 bug_ids = []
-                for b in bugs:
-                    bug_ids.append(b['id'])
-                    print " [Bug %s] %s" % (b['id'], b['summary'])
-                print "\n"
-                print " total: %d" % len(bugs)
+                with open("resolved_bugs.txt", "w+") as f:
+                    for b in bugs:
+                        bug_ids.append(b['id'])
+                        print "      [Bug %s] %s" % (b['id'], self.compat(b['summary']))
+                        f.write("[Bug %s] %s" % (b['id'], self.compat(b['summary'])) + "\n")
+
+                    print "   >> Total bugs: %d" % len(bugs)
                 return bug_ids
         elif r.status_code == 401:
             self.do_login()
@@ -148,3 +206,11 @@ class BugzillaApi:
         }
         data = requests.get(url, params=query)
         print data.json()
+
+    def compat(self, obj):
+        if not obj:
+            return 'None'
+        elif isinstance(object, int):
+            return obj
+
+        return obj.encode('ascii', 'ignore')
