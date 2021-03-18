@@ -10,7 +10,7 @@ export MAIL_TO="hz_gxv33xx@grandstream.cn"
 export MAIL_TO_DEBUG="hplan@grandstream.cn"
 export MAIL_TITLE="GXV3380 OEM D33 git log"
 export SH_PATH="$(cd "$(dirname "$0")";pwd)"
-export PROJ_PATH="/home/hplan/project/dailybuild/alpaca7_eng"
+export PROJ_PATH="/home/hplan/project/dailybuild/alpaca7"
 export BUILD_CMD="./autoBuild.sh"
 export version="54."`date -d"today" +%y.%m.%d`
 export LOG_FILE="/home/hplan/BuildLog/d33/`whoami`_d33_54_"`date -d"today" +%y_%m_%d`"_build_Log"
@@ -63,7 +63,6 @@ mail() {
         sed -e 's/$/<br>/g' ${Log_Raw} >> ${Log_Pretty}
         echo "</div></body></html>" >> ${Log_Pretty}
         if ! ${DEBUG}; then
-#            sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3380 OEM D33 ${version} git log" < ${Log_Pretty}
             sendemail -f hz_no_reply@grandstream.cn -t $1 -s smtp.grandstream.cn -o tls=no message-charset=utf-8 -xu hz_no_reply@grandstream.cn -xp S1pTestH2 -v -u "GXV3380 OEM D33 git log" < ${Log_Pretty}
         fi
         return 0
