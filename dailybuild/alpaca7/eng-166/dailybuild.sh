@@ -10,10 +10,10 @@ export MAIL_TO="hz_gxv33xx@grandstream.cn"
 export MAIL_TO_DEBUG="hplan@grandstream.cn"
 export MAIL_TITLE="GXV3380 eng git log"
 export SH_PATH="$(cd "$(dirname "$0")";pwd)"
-export PROJ_PATH="/home/hplan/project/dailybuild/alpaca7_eng"
+export PROJ_PATH="/home/hplan/project/dailybuild/alpaca7"
 export BUILD_CMD="./autoBuild.sh"
-export version="10."`date -d"tomorrow" +%y.%m.%d`
-export LOG_FILE="/home/hplan/BuildLog/alpaca7/`whoami`_alpaca_10_"`date -d"tomorrow" +%y_%m_%d`"_build_Log"
+export version="10."`date -d"today" +%y.%m.%d`
+export LOG_FILE="/home/hplan/BuildLog/alpaca7/`whoami`_alpaca_10_"`date -d"today" +%y_%m_%d`"_build_Log"
 
 Log_Raw="/tmp/logRaw_Alpaca.html"
 Log_Pretty="/tmp/logPretty_Alpaca.html"
@@ -73,7 +73,7 @@ build() {
     source ${SH_PATH}/../../env.sh
     source ${SH_PATH}/../../openjdk-8-env
 
-    mkdir -p /var/www/html/hz/firmware/GXV3380/${version}/user -p
+#mkdir -p /var/www/html/hz/firmware/GXV3380/${version}/user -p
     cd ${PROJ_PATH}/android && source ${PROJ_PATH}/android/build/envsetup.sh
     if ${ENG}; then
         cd ${PROJ_PATH}/android && lunch cht_alpaca-eng
@@ -97,7 +97,7 @@ build() {
         ##fi
     fi
 
-    cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO} -v ${version} | tee ${LOG_FILE}
+    cd ${PROJ_PATH}/android/vendor/grandstream/build && ${BUILD_CMD} -d -r ${MAIL_TO} | tee ${LOG_FILE}
 }
 
 entrance() {
