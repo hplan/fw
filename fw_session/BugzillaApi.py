@@ -213,4 +213,4 @@ class BugzillaApi:
         elif isinstance(object, int):
             return obj
 
-        return obj.encode('ascii', 'ignore')
+        return obj.encode('utf-8', 'ignore')
